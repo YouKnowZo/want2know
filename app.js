@@ -110,6 +110,10 @@ app.use(express.urlencoded({
 app.use(express.json())
 app.use(express.static('public'))
 
+app.get('/', (req, res) => {
+  res.redirect('/app.html')
+})
+
 app.post('/get_logs', async function (req, res, next) {
   let last_line = 'nothinghere'
   if (req.body.uuid !== '') {
@@ -197,7 +201,7 @@ app.post('/save_settings', async function (req, res, next) {
   }
 
   if (helper.proxy !== '') {
-    helper.header_options.agent = HttpsProxyAgent(helper.proxy)
+    helper.header_options.agent = new HttpsProxyAgent(helper.proxy)
   } else {
     if ('agent' in helper.header_options) {
       delete helper.header_options.agent
@@ -207,9 +211,9 @@ app.post('/save_settings', async function (req, res, next) {
   res.json('Done')
 })
 
-app.get('/generate', async function (req, res, next) {
+app.post('/generate', async function (req, res, next) {
   const list_of_combinations = []
-  if (req.body.option === 'Generate') {
+  if (req.body && req.body.option === 'Generate') {
     if (req.body.words !== undefined && req.body.words.length > 1 && req.body.words.length < 8) {
       for (const perm of generatorics.permutationCombination(req.body.words)) {
         if (perm.join('') !== '') {
@@ -813,18 +817,14 @@ async function list_all_websites () {
   console.log('[Listing] Available websites\n' + temp_arr.join('\n'))
 }
 
-let server_host = 'localhost'
-const server_port = process.env.PORT || 9005
+let server_host = '0.0.0.0'
+const server_port = process.env.PORT || 5000
 
 if (argv.grid !== '') {
   helper.grid_url = argv.grid
 }
-if (argv.docker) {
-  server_host = '0.0.0.0'
-}
 if (argv.gui) {
   app.listen(server_port, server_host, function () {
-    // helper.setup_tecert()
     console.log('Server started at http://%s:%s/app.html', server_host, server_port)
   })
 } else {

@@ -1,1692 +1,1914 @@
-<!--
-//  -------------------------------------------------------------
-//  author        Giga
-//  project       qeeqbox/social-analyzer
-//  email         gigaqeeq@gmail.com
-//  description   app.py (CLI)
-//  licensee      AGPL-3.0
-//  -------------------------------------------------------------
-//  contributors list qeeqbox/social-analyzer/graphs/contributors
-//  -------------------------------------------------------------
--->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Analyzer — OSINT Profile Finder</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-<html>
-<meta charset="utf-8" />
-<title>QeeqBox - Social Analyzer</title>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.default.css" />
-<script src="https://code.jquery.com/jquery-2.1.1.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.js"></script>
-<script src="//unpkg.com/force-graph"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-  html,
-  body {
-    width: 100%;
-    height: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    background-color: #212222;
-  }
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Selectize -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.bootstrap5.min.css" rel="stylesheet">
 
-  header {
-    background-color: #2b2c2c;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    overflow: hide;
-    box-shadow: 0 8px 5px rgba(0, 0, 0, .08);
-  }
-
-  a {
-    color: #d0d0d0 !important;
-  }
-
-  .navbar {
-    height: 50px;
-    color: #d0d0d0 !important;
-  }
-
-  body {
-    display: flex;
-    flex-direction: column;
-  }
-
-  body>* {
-    font-family: monospace !important;
-    font-size: 12px !important;
-    line-height: normal;
-    cursor: default !important;
-    color: #d0d0d0 !important;
-  }
-
-  #selectable {
-    vertical-align: top;
-  }
-
-  th {
-    text-align: left;
-    font-weight: normal !important;
-    background-color: #383939 !important;
-  }
-
-  table {
-    color: #d0d0d0 !important;
-    font-size: 12px !important;
-    margin-bottom: 20px;
-    border: 0;
-    box-shadow: none;
-    -webkit-border-radius: 2px !important;
-    border-radius: 2px !important;
-    width: 100%;
-  }
-
-  tr {
-    border-bottom: 1px solid #3c3c3c;
-  }
-
-  tr:first-child {
-    border-top: none;
-  }
-
-  tr:last-child {
-    border-bottom: none;
-  }
-
-  #selectable .ui-selecting {
-    background: #feca40;
-  }
-
-  #selectable .ui-selected {
-    background: #aa6400;
-    color: white;
-  }
-
-  #selectable ul {
-    margin: 0 0 0 0;
-    padding: 0 0 0 0;
-    list-style-type: none;
-  }
-
-  #selectable ul li {
-    border: none;
-    margin: 2px 2px 2px 2px;
-  }
-
-  .ui-selectable-helper {
-    position: absolute;
-    z-index: 100;
-    border: 1px dotted black;
-  }
-
-  #analyzed {
-    display: none;
-  }
-
-  .center-dev {
-    display: flex;
-    margin-left: auto;
-    margin-top: 50px;
-    padding-top: 20px;
-    overflow-y: auto !important;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: #aa6400 #272c2e;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .string-analyzer-app {
-    width: 95%;
-  }
-
-  .cell-separator {
-    width: 15px;
-  }
-
-  .cell-separator-line {
-    width: 2px;
-    margin-left: 12px;
-    margin-right: 12px;
-    height: 26px;
-    background-color: #383939 !important
-  }
-
-  .separator {
-    height: 1px;
-    margin-bottom: 20px;
-    background-color: #3c3c3c;
-    margin-top: 20px;
-  }
-
-  input[type="text"] {
-    background-color: #383939 !important;
-    -webkit-border-radius: 2px !important;
-    border-radius: 2px !important;
-    border: none;
-    height: 26px;
-    padding: 3px 6px 3px 6px !important;
-    color: #d0d0d0 !important;
-    font-size: 12px;
-  }
-
-  input[type="button"] {
-    border: 0;
-    background-color: #383939 !important;
-    box-shadow: none;
-    -webkit-border-radius: 2px !important;
-    border-radius: 2px !important;
-    color: #d0d0d0 !important;
-    height: 26px;
-    border: none;
-    font-size: 12px;
-  }
-
-  .div-right1 {
-    flex: 1;
-    -webkit-box-shadow: inset 0px -1px 0px #3c3c3c inset;
-    -moz-box-shadow: inset 0px -1px 0px #3c3c3c inset;
-    box-shadow: 0px -1px 0px #3c3c3c inset;
-    margin-left: 10px !important;
-  }
-
-  .div-right {
-    flex: 1;
-    margin-left: 10px !important;
-  }
-
-  .div-left {
-    font-size: 16px;
-    line-height: 16px;
-  }
-
-
-  .div-header {
-    display: flex;
-    height: 15px;
-    color: #d0d0d0 !important;
-    margin-bottom: 20px;
-  }
-
-  .div-100 {
-    width: 100%;
-    display: flex;
-    margin-bottom: 20px;
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .div-100>* {
-    margin-top: 5px;
-    margin-bottom: 5px;
-  }
-
-  #analyzed-options li {
-    display: inline-block;
-    color: #d0d0d0 !important;
-    height: 26px;
-    line-height: 26px;
-    padding-left: 2px;
-    padding-right: 2px;
-  }
-
-  .selectize-dropdown .optgroup {
-    border-top: 1px solid #666666;
-  }
-
-  .optgroup-header {
-    border: none !important;
-    background-color: #383939 !important;
-    color: #d0d0d0 !important;
-    font-weight: bold;
-    font-size: 14px !important;
-  }
-
-  #lookups-section,
-  #possible-words-section,
-  #combinations-section,
-  #output-section-1,
-  #output-section-2,
-  #output-section-3,
-  #output-section-4,
-  #output-section-5,
-  #force-graph-section,
-  #logs-section,
-  #save-to-file-section,
-  #most-common-words-section,
-  #words-info-section,
-  #stats-section,
-  #metadata-section,
-  #ages-section,
-  #custom-search-section,
-  #names-origins-section {
-    display: none;
-  }
-
-  #lookups-checking-info {
-    text-align: left;
-  }
-
-
-  .navbar-nav {
-    flex-direction: inherit !important;
-  }
-
-  .nav-item {
-    font-size: 14px;
-    padding-left: 15px;
-  }
-
-  #most-common-words-section table tr th:first-child,
-  #most-common-words-section table tr td:first-child,
-  #words-info-section table tr th:first-child,
-  #words-info-section table tr td:first-child {
-    width: 150px;
-    min-width: 150px;
-    max-width: 150px;
-    word-break: break-word;
-  }
-
-  #words-info-section table tr th:nth-child(2),
-  #words-info-section table tr td:nth-child(2) {
-    width: 150px;
-    min-width: 150px;
-    max-width: 150px;
-    word-break: break-word;
-  }
-
-  #custom-search-section table tr th:first-child,
-  #custom-search-section table tr td:first-child {
-    width: 150px;
-    min-width: 150px;
-    max-width: 150px;
-    word-break: break-word;
-  }
-
-  .box-border-style {
-    background-color: #2b2c2c !important;
-    -webkit-border-radius: 2px !important;
-    border-radius: 2px !important;
-    border: none;
-    padding: 10px 10px 10px 10px;
-    margin-bottom: 20px;
-  }
-
-  .hex-spinner {
-    width: 140px;
-    height: 140px;
-    animation: spinner 2s linear infinite;
-  }
-
-  @keyframes spinner {
-    0% {
-      stroke-dasharray: 0 0 300 300;
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-card: #1c2128;
+      --bg-hover: #21262d;
+      --border: #30363d;
+      --border-light: #3d444d;
+      --accent: #f78166;
+      --accent-hover: #e06b53;
+      --accent2: #58a6ff;
+      --accent2-hover: #388bfd;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #656d76;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --red: #f85149;
+      --purple: #bc8cff;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 8px 24px rgba(0,0,0,0.4);
     }
 
-    50% {
-      stroke-dasharray: 0 150 300 300;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-size: 14px;
     }
 
-    75% {
-      stroke-dasharray: 150 150 150 150;
+    /* ─── Navbar ─────────────────────────────────── */
+    .navbar-custom {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
     }
 
-    100% {
-      stroke-dasharray: 300 300 150 150;
+    .navbar-brand-custom {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
     }
-  }
 
-  .waiting {
-    position: fixed;
-    z-index: 99999;
-    width: 100%;
-    height: 100%;
-    background: #212222;
-    opacity: .9;
-    display: none;
-  }
+    .navbar-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+    }
 
-  .waiting-box {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    display: none;
-  }
+    .navbar-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+    }
 
-  input[type='checkbox'] {
-    -webkit-appearance: none;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-    padding: 5px;
-    height: 5px;
-    color: #c0c0c0;
-    border: 1px solid #b4b4b4;
-    border-radius: 2px !important;
-    outline: none;
-  }
+    .navbar-title span {
+      color: var(--accent);
+    }
 
-  input[type='checkbox']:checked {
-    position: relative;
-  }
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-  input[type='checkbox']:checked:before {
-    position: absolute;
-    display: block;
-    background: none #b4b4b4;
-    content: '';
-    height: 8px;
-    width: 8px;
-    left: 1px;
-    top: 1px;
-  }
+    .nav-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      font-size: 14px;
+    }
 
-  #detection-options,
-  #google-api,
-  #user-agent-api,
-  #proxy-api {
-    margin-top: 10px;
-    width: 100%;
-    margin-bottom: 10px;
-  }
+    .nav-icon-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-light);
+    }
 
-  #detection-options-list {
-    list-style-type: none;
-    max-height: 200px;
-    text-align: left;
-    margin: 0;
-    padding: 0;
-    overflow: auto;
-    overflow-y: auto;
-  }
+    .nav-badge {
+      background: var(--accent);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 10px;
+      margin-left: 4px;
+    }
 
-  #detection-options li {
-    height: 20px;
-    line-height: 20px;
-  }
+    /* ─── Main Layout ────────────────────────────── */
+    .main-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
 
-  #detection-options label {
-    margin: 0;
-    padding-left: 5px;
-  }
+    /* ─── Hero / Search ──────────────────────────── */
+    .hero {
+      text-align: center;
+      margin-bottom: 40px;
+    }
 
-  #detection-options-buttons {
-    display: inline-flex;
-    margin-top: 10px;
-  }
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      letter-spacing: -1px;
+    }
 
-  .search-result {
-    list-style-type: none;
-    font-size: 17px;
-    padding: 5px;
-  }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-  .modal-header {
-    border-bottom: 1px solid #3c3c3c;
-  }
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      max-width: 500px;
+      margin: 0 auto 28px;
+    }
 
-  .modal-content {
-    background-color: #2b2c2c !important;
-    -webkit-border-radius: 2px !important;
-    border-radius: 2px !important;
-    border: none;
-    padding: 10px 10px 10px 10px;
-    margin-bottom: 20px;
-  }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 8px 16px;
+      max-width: 700px;
+      margin: 0 auto;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
 
-  .modal-footer {
-    border-top: 1px solid #3c3c3c;
-  }
+    .search-bar:focus-within {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+    }
 
-  #google-api input,
-  #user-agent-api input,
-  #proxy-api input {
-    width: 100%;
-    margin-bottom: 10px !important;
-  }
+    .search-bar .search-icon {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
 
-  .modal-body .div-right {
-    flex: 1;
-  }
+    .search-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      padding: 4px 0;
+    }
 
-  .modal-body .div-left {
-    font-size: 14px;
-    line-height: 14px;
-  }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+    }
 
-  .modal-body .div-header {
-    display: flex;
-    height: 15px;
-    color: #d0d0d0 !important;
-    margin-bottom: 10px;
-  }
+    .btn-analyze {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-  .modal-dialog {
-    height: calc(100vh - 100px) !important;
-    display: flex;
-  }
+    .btn-analyze:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
 
-  .modal-content {
-    margin: auto !important;
-    height: fit-content !important;
-  }
+    .btn-analyze:active {
+      transform: translateY(0);
+    }
 
-  .user-info-container {
-    display: flex;
-    max-height: 250px;
-  }
+    /* ─── Options Row ────────────────────────────── */
+    .options-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 700px;
+      margin: 12px auto 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
-  .user-info-container-right {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+    .btn-quick {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
 
-  .user-info-container-right img {
-    max-height: 210px;
-    padding: 10px;
-  }
+    .btn-quick:hover, .btn-quick.active {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
 
-  .user-info-container-right_temp img {
-    filter: blur(5px);
-  }
+    .options-divider {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
 
-  .user-info-container-left {
-    flex-direction: column;
-    justify-content: center;
-    flex: 1 1 0;
-    overflow-y: auto !important;
-    overflow-x: hidden;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    scrollbar-color: #aa6400 #272c2e;
-  }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
 
-  .user-info-container-left::-webkit-scrollbar {
-    display: none;
-  }
+    .btn-ghost:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
 
-  .user-info-container {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #3c3c3c;
-  }
+    /* ─── Selectize Options ──────────────────────── */
+    .selectize-options-wrap {
+      max-width: 700px;
+      margin: 12px auto 0;
+    }
 
-  .user-info-container:last-child {
-    border-bottom: none;
-  }
+    .selectize-control.multi .selectize-input {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+      color: var(--text-primary) !important;
+      min-height: 38px;
+      padding: 4px 8px !important;
+      box-shadow: none !important;
+    }
 
-  .box-border-style-settings {
-    background-color: transparent;
-    -webkit-border-radius: 2px !important;
-    border-radius: 2px !important;
-    border: none;
-    text-align: right;
-    margin-bottom: 10px;
-    font-size: 14px;
-  }
+    .selectize-control.multi .selectize-input.focus {
+      border-color: var(--accent2) !important;
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15) !important;
+    }
 
-  #string-section .div-right {
-    text-align: right;
-    font-size: 16px;
-  }
+    .selectize-control.multi .selectize-input > .item {
+      background: #1f3a5f !important;
+      color: var(--accent2) !important;
+      border: 1px solid rgba(88,166,255,0.3) !important;
+      border-radius: 4px !important;
+      font-size: 11px;
+      padding: 2px 8px !important;
+    }
 
-  .selectize-control {
-    position: static !important;
-    background-color: #383939 !important;
-    min-width: 400px;
-    min-height: 20px;
-    line-height: 20px;
-    color: #d0d0d0 !important;
-  }
+    .selectize-control.multi .selectize-input > input {
+      color: var(--text-primary) !important;
+    }
 
-  .selectize-input {
-    color: #d0d0d0 !important;
-    padding: 0px;
-    background-color: #383939 !important;
-    border: none !important;
-    min-width: 400px;
-    min-height: 20px;
-    line-height: 20px;
-    font-size: 10px;
-  }
+    .selectize-dropdown {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border-light) !important;
+      border-radius: 8px !important;
+      box-shadow: var(--shadow) !important;
+      color: var(--text-primary) !important;
+      font-size: 13px !important;
+    }
 
-  #analyzed-options-selectized {
-    color: #d0d0d0 !important;
-    padding: 3px 6px 3px 6px !important;
-  }
+    .selectize-dropdown .option {
+      padding: 8px 14px !important;
+      color: var(--text-secondary) !important;
+    }
 
-  .selectize-dropdown {
-    color: #d0d0d0 !important;
-    background-color: #383939 !important;
-    border: none !important;
-  }
+    .selectize-dropdown .option:hover,
+    .selectize-dropdown .option.active {
+      background: var(--bg-hover) !important;
+      color: var(--text-primary) !important;
+    }
 
-  .selectize-input .item {
-    background-color: #aa6400;
-  }
+    .selectize-dropdown .optgroup-header {
+      background: var(--bg-secondary) !important;
+      color: var(--text-muted) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 8px 14px !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
 
-  .item {
-    background: #aa6400 !important;
-    color: #ffffff !important;
-  }
+    .selectize-dropdown .optgroup {
+      border-top: 1px solid var(--border) !important;
+    }
 
-  .selectize-input [data-value] {
-    background-color: #111111;
-    background-image: none !important;
-    background-repeat: none !important;
-    -webkit-box-shadow: none !important;
-    box-shadow: none !important
-  }
+    /* ─── Cards ──────────────────────────────────── */
+    .card-custom {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
 
-  .selectize-control.multi .selectize-input>div {
-    border: none !important;
-  }
+    .card-header-custom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
 
-  .selectize-dropdown-content .active {
-    background: #2196f3 !important;
-    color: #ffffff !important;
-  }
+    .card-header-custom:hover {
+      background: var(--bg-hover);
+    }
 
-  .selectize-control.plugin-remove_button [data-value] .remove {
-    border-left: none !important;
-  }
+    .card-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  #output-table-1 {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
+    .card-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
 
-  .profile-card {
-    max-width: 320;
-    float: left;
-    padding: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    .card-icon-orange { background: rgba(247,129,102,0.15); color: var(--accent); }
+    .card-icon-blue   { background: rgba(88,166,255,0.15);  color: var(--accent2); }
+    .card-icon-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
+    .card-icon-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .card-icon-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
+    .card-icon-red    { background: rgba(248,81,73,0.15);   color: var(--red); }
 
-  .profile-card-text {
-    padding: 10px;
-    text-overflow: ellipsis;
-  }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
 
-  .profile-card img {
-    max-height: 210px;
-    padding: 10px;
-  }
+    .card-count {
+      font-size: 11px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
 
-  .logs {
-    padding-top: 20px
-  }
+    .card-toggle-icon {
+      color: var(--text-muted);
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
 
-  .logs_cancel {
-    padding-top: 10px;
-    display: none;
-  }
+    .card-toggle-icon.collapsed {
+      transform: rotate(-90deg);
+    }
 
-  .user-info-container-color-unknown {
-    opacity: 0.4 !important;
-  }
+    .card-body-custom {
+      padding: 20px;
+    }
 
-  .user-info-container-color-failed {
-    opacity: 0.1 !important;
-  }
+    /* ─── Profile Items ───────────────────────────── */
+    .profile-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
 
-  #stats-tables tr td:nth-child(2),
-  #stats-tables tr th:nth-child(2) {
-    text-align: right;
-  }
+    .profile-item:last-child { border-bottom: none; }
 
-  #metadata-table tr td:nth-child(1),
-  #metadata-table tr th:nth-child(1) {
-    width: 50px;
-  }
+    .profile-item:hover { background: rgba(255,255,255,0.02); }
 
-  .div-right-icon {
-    float: right;
-    font-size: 16px;
-  }
+    .profile-favicon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
 
-  #logs-section pre {
-    color: #d0d0d0 !important;
-    font-size: 12px !important;
-    font-family: monospace !important;
-  }
+    .profile-favicon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-  #ixora-graph-iframe {
-    width: 100%;
-    height: 100%;
-    border: none !important;
-  }
-</style>
+    .profile-info { flex: 1; min-width: 0; }
 
+    .profile-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent2);
+      text-decoration: none;
+      word-break: break-all;
+      display: block;
+    }
+
+    .profile-link:hover { text-decoration: underline; }
+
+    .profile-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .profile-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .tag-green  { background: rgba(63,185,80,0.12);  color: var(--green);  border: 1px solid rgba(63,185,80,0.25); }
+    .tag-yellow { background: rgba(210,153,34,0.12); color: var(--yellow); border: 1px solid rgba(210,153,34,0.25); }
+    .tag-red    { background: rgba(248,81,73,0.12);  color: var(--red);    border: 1px solid rgba(248,81,73,0.25); }
+    .tag-gray   { background: rgba(139,148,158,0.12);color: var(--text-secondary); border: 1px solid rgba(139,148,158,0.25); }
+    .tag-blue   { background: rgba(88,166,255,0.12); color: var(--accent2); border: 1px solid rgba(88,166,255,0.25); }
+    .tag-purple { background: rgba(188,140,255,0.12);color: var(--purple);  border: 1px solid rgba(188,140,255,0.25); }
+
+    .profile-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .profile-image-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .profile-item.unknown { opacity: 0.45; }
+    .profile-item.failed  { opacity: 0.2; }
+
+    /* ─── Stats & Tables ─────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .data-table a {
+      color: var(--accent2);
+      text-decoration: none;
+    }
+
+    .data-table a:hover { text-decoration: underline; }
+
+    /* ─── Word Pills ─────────────────────────────── */
+    .word-group { margin-bottom: 16px; }
+
+    .word-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .word-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .word-pill {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .word-pill:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: rgba(88,166,255,0.08);
+    }
+
+    /* ─── Loading Overlay ────────────────────────── */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(13,17,23,0.92);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader-ring {
+      width: 64px;
+      height: 64px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-status {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .btn-cancel-loading {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--red);
+      padding: 6px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      display: none;
+    }
+
+    .btn-cancel-loading:hover {
+      background: rgba(248,81,73,0.1);
+      border-color: var(--red);
+    }
+
+    /* ─── Search History ─────────────────────────── */
+    .history-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+
+    .history-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .history-chip:hover {
+      border-color: var(--border-light);
+      color: var(--text-secondary);
+    }
+
+    .history-chip .chip-delete {
+      color: var(--text-muted);
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .history-chip .chip-delete:hover { color: var(--red); }
+
+    /* ─── Action Bar ─────────────────────────────── */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .results-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .results-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-export {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-export:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* ─── Logs ───────────────────────────────────── */
+    .logs-block {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .logs-block::-webkit-scrollbar { width: 4px; }
+    .logs-block::-webkit-scrollbar-track { background: transparent; }
+    .logs-block::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ─── Settings Modal ─────────────────────────── */
+    .modal-custom .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+    }
+
+    .modal-custom .modal-header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+    }
+
+    .modal-custom .modal-footer {
+      border-top: 1px solid var(--border);
+      padding: 12px 20px;
+    }
+
+    .modal-custom .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-custom .btn-close {
+      filter: invert(1) opacity(0.5);
+    }
+
+    .form-label-custom {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .input-custom {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      font-size: 13px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .input-custom:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(88,166,255,0.1);
+    }
+
+    .input-custom::placeholder { color: var(--text-muted); }
+
+    /* ─── Websites List ──────────────────────────── */
+    .websites-list {
+      max-height: 260px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
+    }
+
+    .websites-list::-webkit-scrollbar { width: 4px; }
+    .websites-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .website-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .website-item:last-child { border-bottom: none; }
+    .website-item:hover { background: var(--bg-hover); }
+
+    .website-item input[type=checkbox] {
+      accent-color: var(--accent);
+      width: 14px;
+      height: 14px;
+    }
+
+    .website-item label {
+      flex: 1;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .website-item .site-rank {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .websites-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-sm-custom {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-sm-custom:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .btn-primary-custom {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary-custom:hover {
+      background: var(--accent-hover);
+    }
+
+    /* ─── Progress Bar ───────────────────────────── */
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+
+    /* ─── Scrollbar global ───────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+    /* ─── Responsive ─────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 26px; }
+      .search-bar { flex-direction: column; gap: 10px; }
+      .btn-analyze { width: 100%; justify-content: center; }
+      .main-wrapper { padding: 20px 16px 60px; }
+    }
+
+    /* ─── Toast ──────────────────────────────────── */
+    .toast-container-custom {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow);
+      animation: slideIn 0.3s ease;
+      min-width: 260px;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    .toast-item.success { border-left: 3px solid var(--green); }
+    .toast-item.error   { border-left: 3px solid var(--red); }
+    .toast-item.info    { border-left: 3px solid var(--accent2); }
+  </style>
+</head>
 <body>
 
-  <div class="waiting">
-    <div class="waiting-box">
-      <svg class="hex-spinner" viewBox="0 -5 100 110">
-        <polygon stroke-width="7" stroke="#aa6400" fill-opacity="0" id="hex" points="50 1 95 25 95 75 50 99 5 75 5 25" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <div class="logs" id="logs"></div>
-      <div class="logs_cancel" id="cancel_task">Cancel task? <i class="fa fa-window-close"></i></div>
-    </div>
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loader-ring"></div>
+  <div class="loading-status" id="loading-status">Starting analysis...</div>
+  <button class="btn-cancel-loading" id="btn-cancel-loading">
+    <i class="fa fa-times"></i> Cancel Task
+  </button>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container-custom" id="toast-container"></div>
+
+<!-- Navbar -->
+<nav class="navbar-custom">
+  <a class="navbar-brand-custom" href="#">
+    <div class="navbar-logo"><i class="fa-solid fa-magnifying-glass"></i></div>
+    <span class="navbar-title">Social<span>Analyzer</span></span>
+  </a>
+  <div class="navbar-actions">
+    <a class="nav-icon-btn" href="https://github.com/qeeqbox/social-analyzer" target="_blank" title="GitHub">
+      <i class="fab fa-github"></i>
+    </a>
+    <button class="nav-icon-btn" id="btn-open-settings" title="Settings">
+      <i class="fa fa-gear"></i>
+    </button>
+    <button class="nav-icon-btn" id="btn-save-json" title="Export JSON" style="display:none">
+      <i class="fa fa-download"></i>
+    </button>
   </div>
+</nav>
 
-  <header>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-      <a class="navbar-brand" href="#">Social Analyzer</a>
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a href="https://github.com/qeeqbox/social-analyzer/stargazers"> <i class="fa fa-star"></i></a>
-        </li>
-        <li class="nav-item">
-          <a href="https://github.com/qeeqbox/social-analyzer/archive/main.zip"> <i class="fa fa-download"></i></a>
-        </li>
-        <li class="nav-item">
-          <a href="https://github.com/qeeqbox/social-analyzer/watchers"> <i class="fa fa-eye"></i></a>
-        </li>
-      </ul>
-    </nav>
-  </header>
-
-  <div class="center-dev">
-    <div class="string-analyzer-app">
-      <div class="modal fade" id="settings-modal" role="dialog">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <div class="div-left">Settings</div>
-              <div class="div-right"></div>
-            </div>
-            <div class="modal-body">
-              <div id="user-agent-api">
-                <div class="div-header">
-                  <div class="div-left">User-Agent (Optional)</div>
-                  <div class="div-right"></div>
-                </div>
-                <input type="text" id="user-agent-string" placeholder="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0" />
-              </div>
-              <div id="proxy-api">
-                <div class="div-header">
-                  <div class="div-left">HTTP\HTTPS Proxy (Optional)</div>
-                  <div class="div-right"></div>
-                </div>
-                <input type="text" id="proxy-string" placeholder="http://host:port" />
-              </div>
-              <div id="google-api">
-                <div class="div-header">
-                  <div class="div-left">Google API (Optional)</div>
-                  <div class="div-right"></div>
-                </div>
-                <input type="text" id="google-api-key" placeholder="Google API Key" />
-                <input type="text" id="google-api-cs" placeholder="Google API CS" />
-              </div>
-              <div id="detection-options">
-                <div class="div-header">
-                  <div class="div-left">Available websites</div>
-                  <div class="div-right"></div>
-                </div>
-                <ul id="detection-options-list">
-                  None
-                </ul>
-                <div id="detection-options-buttons">
-                  <input type="button" id="settings-select-all" value="Select All" />
-                  <div class="cell-separator"></div>
-                  <input type="button" id='de-settings-select-all' value="De-Select All" />
-                  <div class="cell-separator"></div>
-                  <input type="button" id='select-top-10' value="Top 10" />
-                  <div class="cell-separator"></div>
-                  <input type="button" id='select-top-50' value="Top 50" />
-                  <div class="cell-separator"></div>
-                  <input type="button" id='select-top-100' value="Top 100" />
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <input type="button" id="save-settings" value="Save" />
-              <input type="button" value="Dismiss" data-dismiss="modal" />
+<!-- Settings Modal -->
+<div class="modal fade modal-custom" id="settings-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-gear me-2"></i>Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label-custom">User-Agent <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
+            <input class="input-custom" type="text" id="user-agent-string" placeholder="Mozilla/5.0 (Windows NT 10.0; Win64; x64)..." />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">HTTP/HTTPS Proxy <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
+            <input class="input-custom" type="text" id="proxy-string" placeholder="http://host:port" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Google API Key <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
+            <input class="input-custom" type="text" id="google-api-key" placeholder="Google API Key" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Google API CS <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
+            <input class="input-custom" type="text" id="google-api-cs" placeholder="Google API CS" />
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">Available Websites</label>
+            <ul class="websites-list list-unstyled" id="detection-options-list">
+              <li style="padding:12px;color:var(--text-muted)">Loading websites...</li>
+            </ul>
+            <div class="websites-controls">
+              <button class="btn-sm-custom" id="settings-select-all">Select All</button>
+              <button class="btn-sm-custom" id="de-settings-select-all">Deselect All</button>
+              <button class="btn-sm-custom" id="select-top-10">Top 10</button>
+              <button class="btn-sm-custom" id="select-top-50">Top 50</button>
+              <button class="btn-sm-custom" id="select-top-100">Top 100</button>
             </div>
           </div>
         </div>
       </div>
-      <div class="box-border-style" id="string-section">
-        <div class="div-header">
-          <div class="div-left">Enter Profile Name</div>
-          <div class="div-right"><i id="open-settings" class="fa fa-cog"></i></div>
-        </div>
-        <div class="div-100 collapse show">
-          <input type="text" id="string-to-analyze" placeholder="Joe" />
-          <div class="cell-separator"></div>
-          <div name="analyzed-options" placeholder="Choose some options..." id="analyzed-options" multiple="multiple">
-          </div>
-          <div class="cell-separator"></div>
-          <div>or</div>
-          <div class="cell-separator"></div>
-          <input type="button" id="fast-options" value="Fast Options" />
-          <div class="cell-separator-line"></div>
-          <input type="button" id="analyze-normal" value="Analyze" />
-          <div class="cell-separator"></div>
-          <input type="button" id="clear-options" value="Clear" />
-          <div class="cell-separator"></div>
-          <input type="button" id="reset-everything" value="Reset" />
-        </div>
-      </div>
-      <div class="box-border-style" id="lookups-section">
-        <div class="div-header">
-          <div class="div-left">String LookUps</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div class="div-100">
-          <div id="lookups-checking-info" class="collapse show"></div>
-        </div>
-        <div id="lookups-table">
-        </div>
-      </div>
-      <div class="box-border-style" id="most-common-words-section">
-        <div class="div-header">
-          <div class="div-left">Most common words by languages</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="most-common-words-table" class="collapse show">
-        </div>
-      </div>
-      <div class="box-border-style" id="names-origins-section">
-        <div class="div-header">
-          <div class="div-left">Extracted names with orginis</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="names-origins-table" class="collapse show">
-        </div>
-      </div>
-      <div class="box-border-style" id="possible-words-section">
-        <div class="div-header">
-          <div class="div-left">Extracted combinations</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="possible-words-section-table" class="collapse show"></div>
-      </div>
-      <div class="box-border-style" id="ages-section">
-        <div class="div-header">
-          <div class="div-left">Extracted Profile\Person age (Maybe)</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="ages-table" class="collapse show">
-        </div>
-      </div>
-      <div class="box-border-style" id="words-info-section">
-        <div class="div-header">
-          <div class="div-left">Extracted words information </div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="words-info-tables" class="collapse show">
-        </div>
-      </div>
-      <div class="box-border-style" id="custom-search-section">
-        <div class="div-header">
-          <div class="div-left">Custom Search</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="custom-search-table" class="collapse show">
-        </div>
-      </div>
-      <div class="box-border-style" id="combinations-section">
-        <div class="div-header">
-          <div class="div-left">Save Report</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div class="div-100 collapse show">
-          <input type="button" class="save-text" value="Save as (Text)" />
-          <div class="cell-separator"></div>
-          <input type="button" class="save-json" value="Save as (Json)" />
-          <div class="cell-separator"></div>
-          <input type="button" class="save-xml" value="Save as (XML)" />
-        </div>
-      </div>
-      <div class="box-border-style" id="output-section-1">
-        <div class="div-header">
-          <div class="div-left">Profiles</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="output-table-1" class="collapse show"></div>
-      </div>
-      <div class="box-border-style" id="output-section-2">
-        <div class="div-header">
-          <div class="div-left">Detected Profiles (Advanced)</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="output-table-2" class="collapse show"></div>
-      </div>
-      <div class="box-border-style" id="output-section-3">
-        <div class="div-header">
-          <div class="div-left">Detected Profiles (Normal)</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="output-table-3" class="collapse show"></div>
-      </div>
-      <div class="box-border-style" id="output-section-4">
-        <div class="div-header">
-          <div class="div-left">All Profiles (Normal)</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="output-table-4" class="collapse show"></div>
-      </div>
-      <div class="box-border-style" id="force-graph-section">
-        <div class="div-header">
-          <div class="div-left">Graph</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="force-graph-canvas" class="collapse show">
-        </div>
-      </div>
-      <div class="box-border-style" id="metadata-section">
-        <div class="div-header">
-          <div class="div-left">Meta</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="metadata-table" class="collapse show">
-        </div>
-      </div>
-      <div class="box-border-style" id="stats-section">
-        <div class="div-header">
-          <div class="div-left">Stats</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div id="stats-tables" class="collapse show">
-        </div>
-      </div>
-      <div class="box-border-style" id="logs-section">
-        <div class="div-header">
-          <div class="div-left">Logs</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-down"></i></div>
-        </div>
-        <div id="logs-pre" class="collapse"></div>
-      </div>
-      <div class="box-border-style" id="save-to-file-section">
-        <div class="div-header">
-          <div class="div-left">Save to file as</div>
-          <div class="div-right"><i class="div-right-icon fa fa-caret-up"></i></div>
-        </div>
-        <div class="div-100 collapse show">
-          <input type="button" id="download-json" value="JSON" />
-        </div>
+      <div class="modal-footer" style="justify-content:flex-end;gap:8px">
+        <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-primary-custom" id="save-settings">Save Settings</button>
       </div>
     </div>
   </div>
-  <script>
-    /* eslint-disable camelcase */
-    const verbose = true
-    const analyzed_options_options = [{
-        group: 'Name Analysis',
-        value: 'WordInfo',
-        name: 'Get names or words information',
-        disable: false,
-      },
-      {
-        group: 'Name Analysis',
-        value: 'MostCommon',
-        name: 'Find common names or words by language',
-        disable: false,
-      },
-      {
-        group: 'Name Analysis',
-        value: 'FindOrigins',
-        name: 'Find origins of names or words',
-        disable: false,
-      },
-      {
-        group: 'Find Profiles',
-        value: 'LookUps',
-        name: 'Perform normal search queries',
-        disable: false,
-      },
-      {
-        group: 'Find Profiles',
-        value: 'CustomSearch',
-        name: 'Perform custom search queries',
-        disable: false,
-      },
-      {
-        group: 'Find Profiles',
-        value: 'FindUserProfilesFast,GetUserProfilesFast',
-        name: 'Find profiles in fast mode (Recommended)',
-        disable: false,
-      },
-      {
-        group: 'Find Profiles',
-        value: 'FindUserProfilesSlow',
-        name: 'Find profiles in slow mode',
-        disable: false,
-      },
-      {
-        group: 'Find Profiles',
-        value: 'FindUserProfilesSpecial',
-        name: 'Find profiles in slow mode using customized actions',
-        disable: false,
-      },
-      {
-        group: 'Show Profiles',
-        value: 'ShowUserProfilesSlow',
-        name: 'Show screenshots of profiles in slow mode',
-        disable: false,
-      },
-      {
-        group: 'Extract Information',
-        value: 'ExtractMetadata',
-        name: 'Extract metadata of profiles',
-        disable: false,
-      },
-      {
-        group: 'Extract Information',
-        value: 'ExtractPatterns',
-        name: 'Extract defined patterns',
-        disable: false,
-      },
-      {
-        group: 'Visualize Information',
-        value: 'NetworkGraph',
-        name: 'Show a visualized map based on the extracted metadata',
-        disable: false,
-      },
-      {
-        group: 'Stats',
-        value: 'CategoriesStats',
-        name: 'Generate stats of categories',
-        disable: false,
-      }, {
-        group: 'Stats',
-        value: 'MetadataStats',
-        name: 'Generate stats of Metadata',
-        disable: false,
-      },
-      {
-        group: 'Other options',
-        value: 'FindNumbers',
-        name: 'Find numbers in names or words before analyzing',
-        disable: false,
-      },
-      {
-        group: 'Other options',
-        value: 'FindAges',
-        name: 'Find age in names or words before analyzing',
-        disable: false,
-      },
-      {
-        group: 'Other options',
-        value: 'FindSymbols',
-        name: 'Find symbols in names or words before analyzing',
-        disable: false,
-      },
-      {
-        group: 'Other options',
-        value: 'ConvertNumbers',
-        name: 'Convert numbers to letters before analyzing',
-        disable: false,
-      },
-      {
-        group: 'Other options',
-        value: 'SplitWordsByAlphabet',
-        name: 'Split word or name by alphabet before analyzing',
-        disable: false,
-      },
-      {
-        group: 'Other options',
-        value: 'SplitWordsByUpperCase',
-        name: 'Split word or name by upper case before analyzing',
-        disable: false,
-      },
-    ];
+</div>
 
-    const analyzed_options_groups = [{
-        group: 'Name Analysis',
-      },
-      {
-        group: 'Find Profiles',
-      },
-      {
-        group: 'Show Profiles',
-      },
-      {
-        group: 'Extract Information',
-      },
-      {
-        group: 'Visualize Information',
-      },
-      {
-        group: 'Stats',
-      },
-      {
-        group: 'Other options',
-      },
-    ];
+<!-- Main -->
+<div class="main-wrapper">
 
-    // $("#string-to-analyze").attr("placeholder", random_names[(Math.random() * random_names.length) | 0]);
-    $('#string-to-analyze').attr('placeholder', 'johndoe');
+  <!-- Hero Search -->
+  <div class="hero">
+    <h1>Find Profiles <span>Anywhere</span></h1>
+    <p>Search for a username across 1000+ social media platforms using OSINT techniques.</p>
 
-    let interval_logs;
-    let output_json = {};
-    let global_uuid = '';
-    let current_settings = [];
+    <div class="search-bar">
+      <i class="fa fa-magnifying-glass search-icon"></i>
+      <input type="text" id="string-to-analyze" placeholder="johndoe" autocomplete="off" />
+      <button class="btn-analyze" id="analyze-normal">
+        <i class="fa fa-bolt"></i> Analyze
+      </button>
+    </div>
 
-    function change_analyzed_option(string, key, value) {
-      const obj = analyzed_options_options.find((o) => o.value === string);
-      obj[key] = value;
-      return obj;
+    <div class="options-row">
+      <button class="btn-quick active" id="fast-options">⚡ Fast Mode</button>
+      <span class="options-divider">|</span>
+      <div id="analyzed-options" name="analyzed-options" multiple="multiple" style="min-width:300px"></div>
+      <span class="options-divider">|</span>
+      <button class="btn-ghost" id="clear-options">Clear</button>
+      <button class="btn-ghost" id="reset-everything">Reset</button>
+    </div>
+
+    <!-- Search history -->
+    <div class="history-chips" id="history-chips"></div>
+  </div>
+
+  <!-- Results area (hidden until results come in) -->
+  <div id="results-wrapper" style="display:none">
+
+    <!-- Results header -->
+    <div class="results-header">
+      <div>
+        <div class="results-title" id="results-username"></div>
+        <div class="results-subtitle" id="results-meta"></div>
+      </div>
+      <div class="results-actions">
+        <button class="btn-export" id="export-csv"><i class="fa fa-file-csv"></i> CSV</button>
+        <button class="btn-export" id="export-json"><i class="fa fa-file-code"></i> JSON</button>
+      </div>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="stats-grid" id="summary-stats"></div>
+
+  </div>
+
+  <!-- Dynamic sections -->
+  <div id="output-section-3" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-blue"><i class="fa fa-user-check"></i></div>
+          <div class="card-title">Detected Profiles</div>
+          <span class="card-count" id="count-normal">0</span>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="output-table-3"></div>
+    </div>
+  </div>
+
+  <div id="output-section-2" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-purple"><i class="fa fa-eye"></i></div>
+          <div class="card-title">Slow Scan Results</div>
+          <span class="card-count" id="count-slow">0</span>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="output-table-2"></div>
+    </div>
+  </div>
+
+  <div id="output-section-1" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-blue"><i class="fa fa-globe"></i></div>
+          <div class="card-title">Profiles Overview</div>
+          <span class="card-count" id="count-overview">0</span>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="output-table-1" style="display:flex;flex-wrap:wrap;gap:10px"></div>
+    </div>
+  </div>
+
+  <div id="output-section-4" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-orange"><i class="fa fa-star"></i></div>
+          <div class="card-title">Special Scan Results</div>
+          <span class="card-count" id="count-special">0</span>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="output-table-4"></div>
+    </div>
+  </div>
+
+  <div id="lookups-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-yellow"><i class="fa fa-search"></i></div>
+          <div class="card-title">String Lookups</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom">
+        <div id="lookups-checking-info" style="color:var(--text-muted);font-size:12px;margin-bottom:12px"></div>
+        <div id="lookups-table"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="names-origins-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-green"><i class="fa fa-earth-americas"></i></div>
+          <div class="card-title">Name Origins</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="names-origins-table"></div>
+    </div>
+  </div>
+
+  <div id="ages-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-purple"><i class="fa fa-cake-candles"></i></div>
+          <div class="card-title">Estimated Ages</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="ages-table"></div>
+    </div>
+  </div>
+
+  <div id="possible-words-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-blue"><i class="fa fa-shuffle"></i></div>
+          <div class="card-title">Extracted Combinations</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="possible-words-section-table"></div>
+    </div>
+  </div>
+
+  <div id="most-common-words-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-yellow"><i class="fa fa-language"></i></div>
+          <div class="card-title">Most Common Words by Language</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="most-common-words-table"></div>
+    </div>
+  </div>
+
+  <div id="words-info-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-green"><i class="fa fa-book-open"></i></div>
+          <div class="card-title">Word Information</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="words-info-tables"></div>
+    </div>
+  </div>
+
+  <div id="custom-search-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-orange"><i class="fa fa-google" style="font-family:'Font Awesome 6 Brands'"></i></div>
+          <div class="card-title">Custom Search</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="custom-search-table"></div>
+    </div>
+  </div>
+
+  <div id="stats-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-blue"><i class="fa fa-chart-bar"></i></div>
+          <div class="card-title">Statistics</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="stats-tables"></div>
+    </div>
+  </div>
+
+  <div id="metadata-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-purple"><i class="fa fa-database"></i></div>
+          <div class="card-title">Metadata</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" id="metadata-table"></div>
+    </div>
+  </div>
+
+  <div id="force-graph-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-green"><i class="fa fa-diagram-project"></i></div>
+          <div class="card-title">Network Graph</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom" style="height:500px;padding:0" id="force-graph-canvas"></div>
+    </div>
+  </div>
+
+  <div id="logs-section" style="display:none">
+    <div class="card-custom">
+      <div class="card-header-custom" onclick="toggleCard(this)">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-red"><i class="fa fa-terminal"></i></div>
+          <div class="card-title">Activity Logs</div>
+        </div>
+        <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="card-body-custom">
+        <div class="logs-block" id="logs-pre"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-wrapper -->
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"></script>
+
+<script>
+  // ── Helpers ──────────────────────────────────────────────────────
+  function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast-item ${type}`;
+    const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+    const colors = { success: 'var(--green)', error: 'var(--red)', info: 'var(--accent2)' };
+    el.innerHTML = `<i class="fa ${icons[type] || icons.info}" style="color:${colors[type] || colors.info}"></i> ${msg}`;
+    container.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(100px)'; el.style.transition = '0.3s'; setTimeout(() => el.remove(), 300); }, 3500);
+  }
+
+  function toggleCard(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.card-toggle-icon');
+    if (body.style.display === 'none') {
+      body.style.display = '';
+      icon.classList.remove('collapsed');
+    } else {
+      body.style.display = 'none';
+      icon.classList.add('collapsed');
     }
+  }
 
-    $('#analyzed-options').selectize({
-      options: analyzed_options_options,
-      optgroups: analyzed_options_groups,
-      optgroupField: 'group',
-      optgroupLabelField: 'group',
-      optgroupValueField: 'group',
-      valueField: 'value',
-      labelField: 'name',
-      disabledField: 'disable',
-      searchField: ['group', 'value'],
-      plugins: ['remove_button'],
-      onChange(value, isOnInitialize) {
-        const sel = $('#analyzed-options')[0].selectize;
-        if (sel.items.includes('FindUserProfilesFast,GetUserProfilesFast')) {
-          sel.updateOption('FindUserProfilesSlow', change_analyzed_option('FindUserProfilesSlow', 'disable', true));
-          sel.updateOption('FindUserProfilesSpecial', change_analyzed_option('FindUserProfilesSpecial', 'disable', true));
-          sel.updateOption('ShowUserProfilesSlow', change_analyzed_option('ShowUserProfilesSlow', 'disable', true));
-        } else {
-          sel.updateOption('FindUserProfilesSlow', change_analyzed_option('FindUserProfilesSlow', 'disable', false));
-          sel.updateOption('FindUserProfilesSpecial', change_analyzed_option('FindUserProfilesSpecial', 'disable', false));
-          sel.updateOption('ShowUserProfilesSlow', change_analyzed_option('ShowUserProfilesSlow', 'disable', false));
-        }
-        if (sel.items.includes('FindUserProfilesSlow') || sel.items.includes('FindUserProfilesSpecial') || sel.items.includes(
-            'ShowUserProfilesSlow',
-          )) {
-          sel.updateOption('FindUserProfilesFast,GetUserProfilesFast', change_analyzed_option('FindUserProfilesFast,GetUserProfilesFast', 'disable', true));
-        } else {
-          sel.updateOption('FindUserProfilesFast,GetUserProfilesFast', change_analyzed_option('FindUserProfilesFast,GetUserProfilesFast', 'disable', false));
-        }
-      },
-    });
+  function buildTable(headers, rows) {
+    if (!rows.length) return '';
+    const ths = headers.map(h => `<th>${h}</th>`).join('');
+    const trs = rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+    return `<table class="data-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+  }
 
-    function spinner_on_off(on_off, text = '', cancel = false) {
-      if (on_off) {
-        $('#logs').text(text);
-        $('.waiting').show();
-        $('.waiting-box').show();
-        if (cancel === true) {
-          $('.logs_cancel').show();
-        }
+  function getSiteDomain(url) {
+    try { return new URL(url).hostname.replace('www.', ''); } catch(e) { return url; }
+  }
+
+  function getFaviconUrl(link) {
+    try { const u = new URL(link); return `https://www.google.com/s2/favicons?domain=${u.hostname}&sz=32`; } catch(e) { return ''; }
+  }
+
+  // ── Search History ────────────────────────────────────────────────
+  const HISTORY_KEY = 'sa_search_history';
+
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; }
+  }
+
+  function addHistory(query) {
+    let h = getHistory().filter(q => q !== query);
+    h.unshift(query);
+    h = h.slice(0, 10);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+    renderHistory();
+  }
+
+  function removeHistory(query) {
+    const h = getHistory().filter(q => q !== query);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const h = getHistory();
+    const el = document.getElementById('history-chips');
+    if (!h.length) { el.innerHTML = ''; return; }
+    el.innerHTML = h.map(q => `
+      <span class="history-chip">
+        <i class="fa fa-clock-rotate-left" style="font-size:9px;opacity:0.6"></i>
+        <span onclick="document.getElementById('string-to-analyze').value='${q.replace(/'/g, "\\'")}'">${q}</span>
+        <span class="chip-delete" onclick="removeHistory('${q.replace(/'/g, "\\'")}')">×</span>
+      </span>
+    `).join('');
+  }
+
+  // ── Selectize Setup ───────────────────────────────────────────────
+  const analyzed_options_options = [
+    { group: 'Name Analysis',       value: 'FindOrigins',                        name: 'Find origins of names',                           disable: false },
+    { group: 'Name Analysis',       value: 'LookUps',                            name: 'Look up username across search engines',           disable: false },
+    { group: 'Name Analysis',       value: 'WordInfo',                           name: 'Get word definitions & info',                      disable: false },
+    { group: 'Name Analysis',       value: 'MostCommon',                         name: 'Find most common words by language',               disable: false },
+    { group: 'Find Profiles',       value: 'FindUserProfilesFast,GetUserProfilesFast', name: 'Find & get profiles (Fast)',                 disable: false },
+    { group: 'Find Profiles',       value: 'FindUserProfilesSlow',               name: 'Find profiles (Slow — browser-based)',             disable: false },
+    { group: 'Find Profiles',       value: 'FindUserProfilesSpecial',            name: 'Find profiles (Special detection)',                disable: false },
+    { group: 'Show Profiles',       value: 'ShowUserProfilesSlow',               name: 'Show profiles (Slow — render page)',               disable: false },
+    { group: 'Extract Information', value: 'ExtractPatterns',                    name: 'Extract URLs & patterns from profiles',            disable: false },
+    { group: 'Extract Information', value: 'ExtractMetadata',                    name: 'Extract metadata from profiles',                   disable: false },
+    { group: 'Visualize Information', value: 'NetworkGraph',                     name: 'Visualize connections as network graph',           disable: false },
+    { group: 'Stats',               value: 'CategoriesStats',                    name: 'Generate stats by category',                      disable: false },
+    { group: 'Stats',               value: 'MetadataStats',                      name: 'Generate stats from metadata',                    disable: false },
+    { group: 'Other options',       value: 'FindNumbers',                        name: 'Find numbers in name',                            disable: false },
+    { group: 'Other options',       value: 'FindAges',                           name: 'Find age in name',                                disable: false },
+    { group: 'Other options',       value: 'FindSymbols',                        name: 'Find symbols in name',                            disable: false },
+    { group: 'Other options',       value: 'ConvertNumbers',                     name: 'Convert numbers to letters',                      disable: false },
+    { group: 'Other options',       value: 'SplitWordsByAlphabet',               name: 'Split word by alphabet',                          disable: false },
+    { group: 'Other options',       value: 'SplitWordsByUpperCase',              name: 'Split word by uppercase',                         disable: false },
+  ];
+
+  const analyzed_options_groups = [
+    { group: 'Name Analysis' }, { group: 'Find Profiles' }, { group: 'Show Profiles' },
+    { group: 'Extract Information' }, { group: 'Visualize Information' }, { group: 'Stats' }, { group: 'Other options' },
+  ];
+
+  function change_analyzed_option(str, key, value) {
+    const obj = analyzed_options_options.find(o => o.value === str);
+    if (obj) obj[key] = value;
+    return obj;
+  }
+
+  const selectizeInst = $('#analyzed-options').selectize({
+    options: analyzed_options_options,
+    optgroups: analyzed_options_groups,
+    optgroupField: 'group',
+    optgroupLabelField: 'group',
+    optgroupValueField: 'group',
+    valueField: 'value',
+    labelField: 'name',
+    disabledField: 'disable',
+    searchField: ['group', 'value', 'name'],
+    plugins: ['remove_button'],
+    placeholder: 'Choose analysis options...',
+    onChange(value, isOnInitialize) {
+      const sel = $('#analyzed-options')[0].selectize;
+      if (sel.items.includes('FindUserProfilesFast,GetUserProfilesFast')) {
+        ['FindUserProfilesSlow','FindUserProfilesSpecial','ShowUserProfilesSlow'].forEach(v => sel.updateOption(v, change_analyzed_option(v, 'disable', true)));
       } else {
-        $('#logs').text('');
-        $('.waiting').hide();
-        $('.waiting-box').hide();
-        $('.logs_cancel').hide();
+        ['FindUserProfilesSlow','FindUserProfilesSpecial','ShowUserProfilesSlow'].forEach(v => sel.updateOption(v, change_analyzed_option(v, 'disable', false)));
       }
-    }
-
-    function save_to_file_as(output_json) {
-      try {
-        delete output_json.graph;
-        window.URL = window.URL || window.webkitURL;
-        const a = document.createElement('a');
-        a.download = `${output_json.username.replace(/[^a-z0-9 ]/gi, '_').toLowerCase()}.json`;
-        a.innerHTML = 'Download File';
-        a.href = window.URL.createObjectURL(new Blob([JSON.stringify(output_json)], {
-          type: 'application/json',
-        }));
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } catch (err) {
-        verbose && console.log(err);
+      if (['FindUserProfilesSlow','FindUserProfilesSpecial','ShowUserProfilesSlow'].some(v => sel.items.includes(v))) {
+        sel.updateOption('FindUserProfilesFast,GetUserProfilesFast', change_analyzed_option('FindUserProfilesFast,GetUserProfilesFast', 'disable', true));
+      } else {
+        sel.updateOption('FindUserProfilesFast,GetUserProfilesFast', change_analyzed_option('FindUserProfilesFast,GetUserProfilesFast', 'disable', false));
       }
-    }
+    },
+  });
 
-    function cancel_task(uuid) {
-      $.ajax({
-        type: 'POST',
-        url: '/cancel',
-        data: {
-          option: 'on',
-          uuid,
-        },
-      }).done((data) => {}).fail((jqXHR, textStatus, errorThrown) => {
-        // clearInterval(interval_logs);
-      });
-    }
+  // Fast options preset
+  $('#fast-options').on('click', function() {
+    const sel = $('#analyzed-options')[0].selectize;
+    sel.clear();
+    sel.addItem('FindUserProfilesFast,GetUserProfilesFast');
+    sel.addItem('ExtractPatterns');
+    $(this).addClass('active');
+  });
 
-    function get_logs(uuid) {
-      $.ajax({
-        type: 'POST',
-        url: '/get_logs',
-        data: {
-          last_line: $('#logs').text(),
-          uuid,
-        },
-      }).done((data) => {
-        if (data !== 'Error' && data !== 'nothinghere' && data !== 'nothing_here_error' && data !== '') {
-          $('#logs').text(data);
+  // ── Loading ───────────────────────────────────────────────────────
+  let interval_logs;
+  let output_json = {};
+  let global_uuid = '';
+  let current_settings = [];
+
+  function setLoading(on, text = 'Analyzing...', showCancel = false) {
+    const ov = document.getElementById('loading-overlay');
+    document.getElementById('loading-status').textContent = text;
+    document.getElementById('btn-cancel-loading').style.display = showCancel ? 'block' : 'none';
+    ov.classList.toggle('active', on);
+  }
+
+  function get_logs(uuid) {
+    $.ajax({ type: 'POST', url: '/get_logs', data: { last_line: document.getElementById('loading-status').textContent, uuid } })
+      .done(data => {
+        if (data && data !== 'Error' && data !== 'nothinghere' && data !== 'nothing_here_error') {
+          document.getElementById('loading-status').textContent = data;
         } else if (data === 'nothing_here_error' || data === 'Error') {
           clearInterval(interval_logs);
         }
-      }).fail((jqXHR, textStatus, errorThrown) => {
-        // clearInterval(interval_logs);
       });
+  }
+
+  document.getElementById('btn-cancel-loading').addEventListener('click', () => {
+    if (global_uuid) {
+      $.ajax({ type: 'POST', url: '/cancel', data: { option: 'on', uuid: global_uuid } });
+      showToast('Cancellation requested', 'info');
     }
+  });
 
-    function reset_everything() {
-      // $('#analyzed-options')[0].selectize.clear()
-      $('#lookups-checking-info').html('');
-      $('#lookups-table').html('');
-      $('#lookups-section').hide();
-      $('#most-common-words-table').html('');
-      $('#most-common-words-section').hide();
-      $('#words-info-tables').html('');
-      $('#words-info-section').hide();
-      $('#possible-words-section').hide();
-      $('#possible-words-section-table').html('');
-      $('#combinations-section').hide();
-      $('#output-section-1').hide();
-      $('#output-table-1').html('');
-      $('#output-section-2').hide();
-      $('#output-table-2').html('');
-      $('#output-section-3').hide();
-      $('#output-table-3').html('');
-      $('#output-section-4').hide();
-      $('#output-table-4').html('');
-      $('#force-graph-section').hide();
-      $('#force-graph-canvas').html('');
-      $('#logs-section').hide();
-      $('#logs-pre').html('');
-      $('#save-to-file-section').hide();
-      $('#names-origins-section').hide();
-      $('#names-origins-table').html('');
-      $('#custom-search-section').hide();
-      $('#custom-search-table').html('');
-      $('#logs').html('');
-      $('#stats-tables').html('');
-      $('#stats-section').hide();
-      $('#metadata-table').html('');
-      $('#metadata-section').hide();
-      $('#ages-table').html('');
-      $('#ages-section').hide();
-      clearInterval(interval_logs);
-    }
+  // ── Reset ─────────────────────────────────────────────────────────
+  function reset_everything() {
+    ['lookups-section','most-common-words-section','names-origins-section','possible-words-section',
+     'output-section-1','output-section-2','output-section-3','output-section-4',
+     'force-graph-section','logs-section','words-info-section','stats-section',
+     'metadata-section','ages-section','custom-search-section','results-wrapper'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    ['lookups-checking-info','lookups-table','most-common-words-table','names-origins-table',
+     'possible-words-section-table','output-table-1','output-table-2','output-table-3','output-table-4',
+     'force-graph-canvas','logs-pre','words-info-tables','stats-tables','metadata-table',
+     'ages-table','custom-search-table','summary-stats'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.innerHTML = '';
+    });
+    document.getElementById('btn-save-json').style.display = 'none';
+    clearInterval(interval_logs);
+    output_json = {};
+  }
 
-    function setup_selectable(tag) {
-      $(tag).selectable({
-        selecting(event, ui) {
-          if ($(ui.selecting).hasClass('ui-selected')) {
-            this.del_selected.push(ui.selecting);
-          }
-        },
-        unselecting(event, ui) {
-          $(ui.unselecting).addClass('ui-selected');
-        },
-        stop() {
-          $.each(this.del_selected, (ix, de) => {
-            $(de).removeClass('ui-selecting').removeClass('ui-selected');
-          });
-          this.del_selected = [];
-        },
-      });
-    }
+  $('#reset-everything').on('click', reset_everything);
+  $('#clear-options').on('click', () => {
+    const sel = $('#analyzed-options')[0].selectize;
+    sel.clear();
+    $('#fast-options').removeClass('active');
+  });
 
-    function add_extract(site) {
-      let temp_extracted_all = '<div>Extracted: unavailable</div>';
-      let temp_metadata_all = '<div>Metadata: unavailable</div>';
-      try {
-        if (site.extracted !== 'unavailable' && site.extracted !== '') {
-          temp_extracted_all = '';
-          site.extracted.forEach((extracted, i) => {
-            let temp_extracted = '';
-            Object.keys(extracted).forEach((key) => {
-              temp_extracted += `${key} : ${extracted[key]} `;
-            });
-            temp_extracted_all += `<div>Extracted ${i}: ${temp_extracted}</div>`;
-          });
-        }
-      } catch (err) {
-        temp_extracted_all = '<div>Extracted: unavailable</div>';
-      }
-      try {
-        if (site.metadata !== 'unavailable' && site.metadata !== '') {
-          temp_metadata_all = '';
-          site.metadata.forEach((extracted, i) => {
-            let temp_metadata = '';
-            Object.keys(extracted).forEach((key) => {
-              temp_metadata += `${key} : ${extracted[key]} `;
-            });
-            temp_metadata_all += `<div>Metadata ${i}: ${temp_metadata}</div>`;
-          });
-        }
-      } catch (err) {
-        temp_metadata_all = '<div>Metadata: unavailable</div>';
-      }
-
-      return temp_extracted_all + temp_metadata_all;
-    }
-
-    function add_table(items) {
-      let temp_th = '';
-      let temp_td = '';
-
-      Object.keys(items).forEach((key) => {
-        if (items[key].length > 0) {
-          temp_th += `<th>${key}</th>`;
-          let temp_ul = '';
-          items[key].forEach((item) => {
-            temp_ul += `<li>${item}</li>`;
-          });
-          temp_td += `<td id="selectable"><ul id="${key}-prefix-search-box">${temp_ul}</ul></td>`;
-        }
-      });
-
-      if (temp_th !== '' && temp_td !== '') {
-        $('#possible-words-section-table').html(`<table><tr>${temp_th}</tr>` + `<tr>${temp_td}</tr>` + '</table>');
-        $('#possible-words-section').show();
-      }
-    }
-
-    async function analyze_string() {
-      reset_everything();
-      spinner_on_off(true, 'Retrieving logs', true);
-      output_json = {};
-      const random_string = Math.random().toString(36).substring(2);
-      global_uuid = random_string;
-      interval_logs = setInterval(get_logs.bind(null, random_string), 1000);
-      try {
-        const list_of_options = [];
-        $('.selectize-input .item').each(function() {
-          list_of_options.push($(this).attr('data-value'));
+  // ── Extract helper ────────────────────────────────────────────────
+  function add_extract(site) {
+    let html = '';
+    try {
+      if (site.extracted && site.extracted !== 'unavailable') {
+        site.extracted.forEach((e, i) => {
+          const kv = Object.entries(e).map(([k,v]) => `${k}: ${v}`).join(', ');
+          html += `<div class="profile-detail">Extracted ${i}: ${kv}</div>`;
         });
-
-        await $.ajax({
-          type: 'POST',
-          url: '/analyze_string',
-          data: {
-            string: $('#string-to-analyze').val(),
-            group: false,
-            option: list_of_options.join(','),
-            uuid: random_string,
-          },
-        }).done((data) => {
-          if (data !== 'Error') {
-            let temp_tr = '';
-            output_json = data;
-            if (data.common.length > 0) {
-              temp_tr = '';
-              Object.keys(data.common).forEach((item) => {
-                temp_tr += `<tr><td>${data.common[item].word}</td><td>${data.common[item].languages}</td></tr>`;
-              });
-
-              $('#most-common-words-table').last().append(`<table><tr><th>word</th><th>languages</th></tr>${temp_tr}</table>`);
-              $('#most-common-words-section').show();
-            }
-            if ((data.info.checking.indexOf('with no lookups') === -1)) {
-              $('#lookups-checking-info').html(data.info.checking);
-              if (data.info.items.length > 0) {
-                temp_tr = '';
-                Object.keys(data.info.items).forEach((item) => {
-                  temp_tr += `<tr><td>${data.info.items[item].title}</td><td>${data.info.items[item].snippet}</td></tr>`;
-                });
-                $('#lookups-table').last().append(`<table><tr><th>title</th><th>snippet</th></tr>${temp_tr}</table>`);
-                $('#lookups-table').show();
-              }
-
-              $('#lookups-section').show();
-            }
-            if (data.words_info.length > 0) {
-              data.words_info.forEach((item) => {
-                temp_tr = `<tr><td>${item.word}</td><td>definition</td><td>${item.text}</td></tr>`;
-                if (item.results.length > 0) {
-                  item.results.forEach((result) => {
-                    temp_tr += `<tr><td>${item.word}</td><td>${result.type}</td><td>${result.text}</td></tr>`;
-                  });
-                }
-                $('#words-info-tables').last().append(`<table><tr><th>word</th><th>type</th><th>text</th></tr>${temp_tr}</table>`);
-              });
-              $('#words-info-section').show();
-            }
-
-            add_table(data.table);
-
-            if (data.user_info_advanced.data.length > 0) {
-              temp_tr = '';
-              if (data.user_info_advanced.type === 'all' || data.user_info_advanced.type === 'noshow') {
-                data.user_info_advanced.data.forEach((site) => {
-                  if (site.found > 0 || site.image !== '') {
-                    let temp_image = '';
-                    if (site.image !== '') {
-                      temp_image = `<img src=${site.image}>`;
-                    }
-                    const temp_extract_adv = add_extract(site);
-                    temp_tr += `<div class="user-info-container"><div class="user-info-container-left"><div>Link: <a href="${site.link}">${site.link}</a></div><div>Username: ${site.username}</div><div>Rate: ${site.rate}</div><div>Status: ${site.status
-                }</div><div>Title: ${site.title
-                }</div><div>Language: ${site.language}</div><div>Country: ${site.country}</div><div>Rank: ${site.rank}</div><div>Description: ${site.type}</div><div>Text: ${site.text}</div>${temp_extract_adv
-                }</div><div class="user-info-container-right">${temp_image
-                }</div></div>`;
-                  }
-                });
-
-                $('#output-table-2').html(temp_tr);
-                $('#output-section-2').show();
-              } else if (data.user_info_advanced.type === 'show') {
-                data.user_info_advanced.data.forEach((site) => {
-                  if (site.found > 0 || site.image !== '') {
-                    let temp_image = '';
-                    if (site.image !== '') {
-                      temp_image = `<img src=${site.image}>`;
-                    }
-                    temp_tr += `<div class="profile-card"><div class="profile-card-text">Link: <a href="${site.link}">${site.link}</a></div>${temp_image} </div>`;
-                  }
-                });
-
-                $('#output-table-1').html(temp_tr);
-                $('#output-section-1').show();
-              }
-            }
-
-            if (data.user_info_normal.data.length > 0) {
-              temp_tr = '';
-
-              data.user_info_normal.data.forEach((site) => {
-                if (site.method === 'all') {
-                  if (site.good === 'true') {
-                    const temp_extract_normal_all = add_extract(site);
-                    temp_tr += `<div class="user-info-container"><div class="user-info-container-left"><div>Link: <a href="${site.link}">${site.link}</a></div><div>Username: ${site.username}</div><div>Rate: ${site.rate}</div><div>Status: ${site.status
-                }</div><div>Title: ${site.title
-                }</div><div>Language: ${site.language}</div><div>Country: ${site.country}</div><div>Rank: ${site.rank}</div><div>Description: ${site.type}</div><div>Text: ${site.text}</div>${temp_extract_normal_all
-                }</div><div class="user-info-container-right"></div></div>`;
-                  } else {
-                    temp_tr += `<div class="user-info-container user-info-container-color-unknown"><div class="user-info-container-left"><div>Link: <a href="${site.link}">${site.link}</a></div><div>Username: ${site.username}</div><div>Title: ${site.title
-                }</div><div>Language: ${site.language}</div><div>Country: ${site.country}</div><div>Rank: ${site.rank}</div><div>Description: ${site.type}</div><div>Text: ${site.text
-                }</div></div><div class="user-info-container-right"></div></div>`;
-                  }
-                } else if (site.method === 'find') {
-                  if (site.good === 'true') {
-                    const temp_extract_normal_find = add_extract(site);
-                    temp_tr += `<div class="user-info-container"><div class="user-info-container-left"><div>Link: <a href="${site.link}">${site.link}</a></div><div>Username: ${site.username}</div><div>Rate: ${site.rate}</div><div>Status: ${site.status
-                }</div><div>Title: ${site.title
-                }</div><div>Language: ${site.language}</div><div>Country: ${site.country}</div><div>Rank: ${site.rank}</div><div>Description: ${site.type}</div><div>Text: ${site.text}</div>${temp_extract_normal_find
-                }</div><div class="user-info-container-right"></div></div>`;
-                  }
-                } else if (site.method === 'get') {
-                  temp_tr += `<div class="user-info-container user-info-container-color-unknown"><div class="user-info-container-left"><div>Link: <a href="${site.link}">${site.link}</a></div><div>Username: ${site.username}</div><div>Rate: ${site.rate
-              }</div><div>Status: ${site.status}</div><div>Title: ${site.title
-              }</div><div>Language: ${site.language}</div><div>Country: ${site.country}</div><div>Rank: ${site.rank}</div><div>Description: ${site.type}</div><div>Text: ${site.text
-              }</div></div><div class="user-info-container-right"></div></div>`;
-                } else if (site.method === 'failed') {
-                  temp_tr += `<div class="user-info-container user-info-container-color-failed"><div class="user-info-container-left"><div>Link: <a href="${site.link}">${site.link
-              }</a></div><div>Username: ${site.username}</div></div><div class="user-info-container-right"></div></div>`;
-                }
-              });
-
-              $('#output-table-3').html(temp_tr);
-              $('#output-section-3').show();
-            }
-
-            if (data.user_info_special.data.length > 0) {
-              temp_tr = '';
-              data.user_info_special.data.forEach((site) => {
-                if (site.found > 0) {
-                  const temp_image = '';
-                  temp_tr += `<div class="user-info-container"><div class="user-info-container-left"><div>Link: <a href="${site.link}">${site.link}</a></div><div>Username: ${site.username}</div><div>Rate: ${site.rate}</div><div>Status: ${site.status
-              }</div><div>Title: ${site.title
-              }</div><div>Description: ${site.type}</div><div>Text: ${site.text}</div></div><div class="user-info-container-right">${temp_image}</div></div>`;
-                }
-              });
-
-              $('#output-table-4').html(temp_tr);
-              $('#output-section-4').show();
-            }
-            if (data.names_origins.length > 0) {
-              temp_tr = '';
-              Object.keys(data.names_origins).forEach((item) => {
-                temp_tr += `<tr><td>${data.names_origins[item].origin}</td><td>${data.names_origins[item].name}</td><td>${data.names_origins[item].matched}</td><td>${data.names_origins[item].similar}</td><td>${data
-              .names_origins[item].gender}</td></tr>`;
-              });
-              $('#names-origins-table').last().append(`<table><tr><th>origin</th><th>name</th><th>matched</th><th>similar</th><th>gender</th></tr>${temp_tr}</table>`);
-              $('#names-origins-section').show();
-            }
-            if (data.custom_search.length > 0) {
-              temp_tr = '';
-              Object.keys(data.custom_search).forEach((item) => {
-                temp_tr += `<tr><td>${data.custom_search[item].site}</td><td><a href="${data.custom_search[item].link}">${data.custom_search[item].link}</a></td><td>${data.custom_search[item].snippet}</td></tr>`;
-              });
-              $('#custom-search-table').last().append(`<table><tr><th>site</th><th>link</th><th>snippet</th></tr>${temp_tr}</table>`);
-              $('#custom-search-section').show();
-            }
-
-            if ((data.graph.graph.nodes.length > 0) && (data.graph.graph.links.length > 0)) {
-              $('#force-graph-canvas').html('<iframe id="ixora-graph-iframe" src="/graph.html"></iframe>');
-              $('#ixora-graph-iframe').load(function() {
-                document.getElementById('ixora-graph-iframe').contentWindow.ixora_wrapper(data.graph, true);
-              });
-              $('#force-graph-section').show();
-            }
-
-            Object.keys(data.stats).forEach((type_key) => {
-              if(typeof data.stats[type_key] === "object" && !Array.isArray(data.stats[type_key])){
-                if (Object.keys(data.stats[type_key]).length > 0) {
-                  Object.keys(data.stats[type_key]).forEach((status_key) => {
-                    temp_tr = '';
-                    data.stats[type_key][status_key].forEach((item) => {
-                      temp_tr += `<tr><td>${item[0]}</td><td>%${item[1]}</td></tr>`;
-                    });
-                    if (temp_tr.length > 0) {
-                      $('#stats-tables').last().append(`<table><tr><th>[${status_key} profiles] ${type_key}</th><th>Percentage</th></tr>${temp_tr}</table>`);
-                    }
-                  });
-                  $('#stats-section').show();
-                }
-              }
-              if(typeof data.stats[type_key] === "object" && Array.isArray(data.stats[type_key])){
-                temp_tr = '';
-                data.stats[type_key].forEach((item) => {
-                  temp_tr += `<tr><td>${item[0]}</td><td>${item[1]}</td></tr>`;
-                });
-
-                if (temp_tr.length > 0) {
-                  $('#metadata-table').last().append(`<table><tr><th>Total</th><th>Metadata string</th></tr>${temp_tr}</table>`);
-                }
-
-                $('#metadata-section').show();
-              }
-            });
-
-            if(data.ages.length > 0){
-              temp_tr = '';
-              data.ages.forEach((item) => {
-                temp_tr += `<tr><td>${item.found}</td><td>${item.year}</td><td>${item.age}</td></tr>`;
-              });
-
-              if (temp_tr.length > 0) {
-                $('#ages-table').last().append(`<table><tr><th>Found</th><th>Year</th><th>Age</th></tr>${temp_tr}</table>`);
-              }
-
-              $('#ages-section').show();
-            }
-
-            if (data.logs.length > 0) {
-              $('#logs-pre').html(`<pre>${data.logs}</pre>`);
-              $('#logs-section').show();
-            }
-
-            if ((data.common.length > 0) || (data.info.checking.indexOf('with no lookups') === -1) || (data.words_info.length > 0) || (data.user_info_advanced.data.length > 0) || (data.user_info_normal.data.length > 0) || (data
-                .user_info_special.data.length > 0) || (data.names_origins.length > 0) || (data.custom_search.length > 0)) {
-              $('#save-to-file-section').show();
-            } else {
-              for (const [key, value] of Object.entries(data.table)) {
-                if (value.length > 0) {
-                  $('#save-to-file-section').show();
-                  break;
-                }
-              }
-            }
-          }
-        });
-      } catch (err) {
-        verbose && console.log(err);
       }
+    } catch(e) {}
+    try {
+      if (site.metadata && site.metadata !== 'unavailable') {
+        site.metadata.forEach((m, i) => {
+          const kv = Object.entries(m).map(([k,v]) => `${k}: ${v}`).join(', ');
+          html += `<div class="profile-detail">Metadata ${i}: ${kv}</div>`;
+        });
+      }
+    } catch(e) {}
+    return html;
+  }
+
+  // ── Build profile item ────────────────────────────────────────────
+  function buildProfileItem(site, cls = '') {
+    const domain = getSiteDomain(site.link || '');
+    const favUrl = getFaviconUrl(site.link || '');
+    const rateNum = parseFloat(site.rate) || 0;
+    const rateClass = rateNum >= 70 ? 'tag-green' : rateNum >= 40 ? 'tag-yellow' : 'tag-red';
+    const extract = add_extract(site);
+    let imgHtml = '';
+    if (site.image && site.image !== '') {
+      imgHtml = `<img src="${site.image}" class="profile-image-thumb" onerror="this.style.display='none'" alt="">`;
+    }
+    return `
+      <div class="profile-item ${cls}">
+        <div class="profile-favicon">
+          ${favUrl ? `<img src="${favUrl}" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\\'fa fa-link\\' style=\\'color:var(--text-muted)\\'></i>'" alt="">` : '<i class="fa fa-link" style="color:var(--text-muted)"></i>'}
+        </div>
+        <div class="profile-info">
+          <a href="${site.link}" class="profile-link" target="_blank">${site.link || domain}</a>
+          <div class="profile-meta">
+            ${site.rate !== undefined && site.rate !== '' ? `<span class="profile-tag ${rateClass}">Rate ${site.rate}</span>` : ''}
+            ${site.status  ? `<span class="profile-tag tag-gray">${site.status}</span>` : ''}
+            ${site.country ? `<span class="profile-tag tag-blue">${site.country}</span>` : ''}
+            ${site.type    ? `<span class="profile-tag tag-purple">${site.type}</span>` : ''}
+            ${site.language? `<span class="profile-tag tag-gray">${site.language}</span>` : ''}
+          </div>
+          ${site.title ? `<div class="profile-detail" style="margin-top:4px;color:var(--text-secondary)">${site.title}</div>` : ''}
+          ${site.text  ? `<div class="profile-detail">${site.text.substring(0,120)}${site.text.length>120?'…':''}</div>` : ''}
+          ${extract}
+        </div>
+        ${imgHtml}
+      </div>`;
+  }
+
+  // ── Main Analyze ──────────────────────────────────────────────────
+  async function analyze_string() {
+    const query = document.getElementById('string-to-analyze').value.trim();
+    if (!query) { showToast('Please enter a username to analyze', 'error'); return; }
+
+    reset_everything();
+    setLoading(true, 'Starting analysis...', true);
+    output_json = {};
+
+    const random_string = Math.random().toString(36).substring(2);
+    global_uuid = random_string;
+    interval_logs = setInterval(() => get_logs(random_string), 1000);
+
+    const list_of_options = [];
+    $('.selectize-input .item').each(function() { list_of_options.push($(this).attr('data-value')); });
+
+    try {
+      const data = await $.ajax({
+        type: 'POST',
+        url: '/analyze_string',
+        data: { string: query, group: false, option: list_of_options.join(','), uuid: random_string },
+        timeout: 300000,
+      });
 
       clearInterval(interval_logs);
-      spinner_on_off(false);
-    }
+      setLoading(false);
 
-    async function settings_modal(option) {
-      spinner_on_off(true);
-      if (option === 'get_settings') {
-        await $.ajax({
-          type: 'GET',
-          url: '/get_settings',
-        }).done((data) => {
-          if (data !== 'Error') {
-            if (data.websites.length > 0) {
-              current_settings = data;
-              let temp_tr = '';
-              data.websites.forEach((site) => {
-                let temp_selected = '';
-                if (site.selected === 'true') {
-                  temp_selected = 'checked';
-                }
-                temp_tr += `<li><input type="checkbox" name=url_${site.index} ${temp_selected}><label for=url_${site.index}>${site.url}</label></li>`;
-              });
-
-              $('#detection-options-list').html(temp_tr);
-            }
-            $('#user-agent-string').val(data.user_agent);
-            $('#google-api-key').val(data.google[0]);
-            $('#google-api-cs').val(data.google[1]);
-          }
-        });
-      } else if (option === 'save_settings') {
-        const temp_checked = [];
-        $('#detection-options-list :checked').each(function() {
-          temp_checked.push(Number(this.name.substring('url_'.length)));
-        });
-        await $.ajax({
-          type: 'POST',
-          url: '/save_settings',
-          data: {
-            websites: temp_checked.join(','),
-            user_agent: $('#user-agent-string').val(),
-            proxy: $('#proxy-string').val(),
-            google_key: $('#google-api-key').val(),
-            google_cv: $('#google-api-cs').val(),
-          },
-        }).done((data) => {
-          if (data !== 'Error') {}
-        });
+      if (data === 'Error' || !data) {
+        showToast('Analysis failed. Try again.', 'error');
+        return;
       }
 
-      spinner_on_off(false);
-    }
+      output_json = data;
+      addHistory(query);
 
-    $('#de-settings-select-all').click((e) => {
-      e.preventDefault();
-      $('#detection-options-list input:checkbox').prop('checked', false);
-    });
+      // ── Results header
+      document.getElementById('results-username').textContent = `Results for "${data.username}"`;
+      document.getElementById('results-wrapper').style.display = 'block';
 
-    $('#settings-select-all').click((e) => {
-      e.preventDefault();
-      $('#detection-options-list input:checkbox').prop('checked', true);
-    });
+      const normalFound  = (data.user_info_normal.data  || []).filter(s => s.good === 'true' || s.method === 'find').length;
+      const slowFound    = (data.user_info_advanced.data || []).filter(s => s.found > 0 || s.image).length;
+      const specialFound = (data.user_info_special.data  || []).filter(s => s.found > 0).length;
+      const total = normalFound + slowFound + specialFound;
 
-    $('[id^=select-top-]').click(function(e) {
-      e.preventDefault();
-      if ('websites' in current_settings) {
-        if (current_settings.websites.length > 0) {
-          const websites_entries_filtered = current_settings.websites.filter((item) => item.global_rank !== 0);
-          websites_entries_filtered.sort((a, b) => a.global_rank - b.global_rank);
-          const top_websites = new RegExp('^select-top-([0-9]+)$', 'i');
-          const matched = $(this).attr('id').match(top_websites);
-          if (typeof matched !== 'undefined' && matched !== null) {
-            $('#detection-options-list input:checkbox').prop('checked', false);
-            for (let i = 0; i < matched[1]; i++) {
-              $(`#detection-options-list input:checkbox[name="url_${websites_entries_filtered[i].index}"]`).prop('checked', true);
-            }
+      document.getElementById('results-meta').textContent =
+        `${total} profile${total !== 1 ? 's' : ''} found across ${(data.user_info_normal.data || []).length} platforms`;
+
+      // Summary stats
+      const statsHtml = [
+        { num: normalFound,  label: 'Detected',  color: 'var(--green)'  },
+        { num: (data.user_info_normal.data||[]).length, label: 'Scanned', color: 'var(--accent2)' },
+        { num: data.names_origins.length, label: 'Origins', color: 'var(--purple)' },
+        { num: (data.ages||[]).length, label: 'Age Hints', color: 'var(--yellow)' },
+      ].map(s => `<div class="stat-card"><div class="stat-num" style="color:${s.color}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
+      document.getElementById('summary-stats').innerHTML = statsHtml;
+
+      // ── Normal / Fast profiles
+      if (data.user_info_normal.data.length > 0) {
+        let html = '';
+        data.user_info_normal.data.forEach(site => {
+          if (site.method === 'all') {
+            html += buildProfileItem(site, site.good === 'true' ? '' : 'unknown');
+          } else if (site.method === 'find') {
+            if (site.good === 'true') html += buildProfileItem(site);
+          } else if (site.method === 'get') {
+            html += buildProfileItem(site, 'unknown');
+          } else if (site.method === 'failed') {
+            html += buildProfileItem(site, 'failed');
           }
+        });
+        document.getElementById('output-table-3').innerHTML = html;
+        document.getElementById('count-normal').textContent = normalFound;
+        document.getElementById('output-section-3').style.display = 'block';
+        showToast(`Found ${normalFound} profile${normalFound !== 1 ? 's' : ''}`, 'success');
+      }
+
+      // ── Slow profiles
+      if (data.user_info_advanced.data.length > 0) {
+        let html = '';
+        if (data.user_info_advanced.type === 'all' || data.user_info_advanced.type === 'noshow') {
+          data.user_info_advanced.data.forEach(site => {
+            if (site.found > 0 || site.image) html += buildProfileItem(site);
+          });
+          document.getElementById('output-table-2').innerHTML = html;
+          document.getElementById('count-slow').textContent = slowFound;
+          document.getElementById('output-section-2').style.display = 'block';
+        } else if (data.user_info_advanced.type === 'show') {
+          data.user_info_advanced.data.forEach(site => {
+            if (site.found > 0 || site.image) {
+              const favUrl = getFaviconUrl(site.link || '');
+              html += `<div style="text-align:center;padding:8px"><a href="${site.link}" target="_blank"><img src="${favUrl}" style="width:32px;height:32px;border-radius:6px" onerror="this.style.display='none'" alt=""><div style="font-size:11px;margin-top:4px;color:var(--text-muted)">${getSiteDomain(site.link)}</div></a></div>`;
+            }
+          });
+          document.getElementById('output-table-1').innerHTML = html;
+          document.getElementById('count-overview').textContent = slowFound;
+          document.getElementById('output-section-1').style.display = 'block';
         }
       }
-    });
 
-    setup_selectable('#analyzed-options');
+      // ── Special profiles
+      if (data.user_info_special.data.length > 0) {
+        let html = '';
+        data.user_info_special.data.forEach(site => {
+          if (site.found > 0) html += buildProfileItem(site);
+        });
+        document.getElementById('output-table-4').innerHTML = html;
+        document.getElementById('count-special').textContent = specialFound;
+        document.getElementById('output-section-4').style.display = 'block';
+      }
 
-    $('#analyze-normal').click((e) => {
-      e.preventDefault();
-      analyze_string();
-    });
+      // ── Lookups
+      if (data.info.checking.indexOf('with no lookups') === -1) {
+        document.getElementById('lookups-checking-info').textContent = data.info.checking;
+        if (data.info.items.length > 0) {
+          const rows = data.info.items.map(i => [i.title, i.snippet]);
+          document.getElementById('lookups-table').innerHTML = buildTable(['Title','Snippet'], rows);
+        }
+        document.getElementById('lookups-section').style.display = 'block';
+      }
 
-    $('.generate').click((e) => {
-      e.preventDefault();
-      // generate_combinations('Generate');
-    });
+      // ── Most common words
+      if (data.common.length > 0) {
+        const rows = data.common.map(i => [i.word, i.languages]);
+        document.getElementById('most-common-words-table').innerHTML = buildTable(['Word','Languages'], rows);
+        document.getElementById('most-common-words-section').style.display = 'block';
+      }
 
-    $('#reset-everything').click((e) => {
-      e.preventDefault();
-      reset_everything();
-    });
+      // ── Names origins
+      if (data.names_origins.length > 0) {
+        const rows = data.names_origins.map(i => [i.origin, i.name, i.matched, i.similar, i.gender]);
+        document.getElementById('names-origins-table').innerHTML = buildTable(['Origin','Name','Matched','Similar','Gender'], rows);
+        document.getElementById('names-origins-section').style.display = 'block';
+      }
 
-    $('#save-settings').click((e) => {
-      e.preventDefault();
-      settings_modal('save_settings');
-      $('#settings-modal').modal('toggle');
-    });
+      // ── Ages
+      if ((data.ages || []).length > 0) {
+        const rows = data.ages.map(i => [i.found, i.year, i.age]);
+        document.getElementById('ages-table').innerHTML = buildTable(['Found','Year','Age'], rows);
+        document.getElementById('ages-section').style.display = 'block';
+      }
 
-    $('#open-settings').click((e) => {
-      e.preventDefault();
-      settings_modal('get_settings');
-      $('#settings-modal').modal();
-    });
+      // ── Word table (combinations)
+      if (data.table && Object.keys(data.table).length > 0) {
+        let html = '';
+        Object.entries(data.table).forEach(([key, words]) => {
+          if (words.length > 0) {
+            const pills = words.map(w => `<span class="word-pill">${w}</span>`).join('');
+            html += `<div class="word-group"><div class="word-group-title">${key}</div><div class="word-pills">${pills}</div></div>`;
+          }
+        });
+        if (html) {
+          document.getElementById('possible-words-section-table').innerHTML = html;
+          document.getElementById('possible-words-section').style.display = 'block';
+        }
+      }
 
-    $('#clear-options').click((e) => {
-      e.preventDefault();
-      $('#analyzed-options')[0].selectize.clear();
-    });
+      // ── Words info
+      if (data.words_info.length > 0) {
+        let html = '';
+        data.words_info.forEach(item => {
+          const rows = [['definition', item.text], ...item.results.map(r => [r.type, r.text])];
+          html += `<div style="margin-bottom:16px"><div class="word-group-title">${item.word}</div>${buildTable(['Type','Text'], rows)}</div>`;
+        });
+        document.getElementById('words-info-tables').innerHTML = html;
+        document.getElementById('words-info-section').style.display = 'block';
+      }
 
-    $('#fast-options').click((e) => {
-      e.preventDefault();
-      $('#analyzed-options')[0].selectize.clear();
-      $('#analyzed-options')[0].selectize.setValue(['WordInfo', 'MostCommon', 'FindOrigins', 'LookUps', 'CustomSearch', 'FindUserProfilesFast,GetUserProfilesFast', 'ExtractMetadata', 'ExtractPatterns', 'NetworkGraph', 'FindNumbers',
-        'CategoriesStats','MetadataStats','FindAges',
-        'FindSymbols', 'SplitWordsByAlphabet', 'SplitWordsByUpperCase',
-      ]);
-    });
+      // ── Custom search
+      if (data.custom_search.length > 0) {
+        const rows = data.custom_search.map(i => [i.site, `<a href="${i.link}" target="_blank">${i.link}</a>`, i.snippet]);
+        document.getElementById('custom-search-table').innerHTML = buildTable(['Site','Link','Snippet'], rows);
+        document.getElementById('custom-search-section').style.display = 'block';
+      }
 
-    $('#download-json').click((e) => {
-      e.preventDefault();
-      save_to_file_as(output_json);
-    });
+      // ── Network graph
+      if (data.graph && data.graph.graph && data.graph.graph.nodes.length > 0) {
+        document.getElementById('force-graph-canvas').innerHTML = '<iframe id="ixora-graph-iframe" src="/graph.html" style="width:100%;height:100%;border:none"></iframe>';
+        document.getElementById('ixora-graph-iframe').addEventListener('load', function() {
+          this.contentWindow.ixora_wrapper(data.graph, true);
+        });
+        document.getElementById('force-graph-section').style.display = 'block';
+      }
 
-    $('#cancel_task').click((e) => {
-      e.preventDefault();
-      if (global_uuid !== '') {
-        cancel_task(global_uuid);
+      // ── Stats
+      if (data.stats) {
+        let hasStats = false;
+        Object.entries(data.stats).forEach(([type_key, val]) => {
+          if (typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length > 0) {
+            Object.entries(val).forEach(([status_key, items]) => {
+              const rows = items.map(i => [i[0], `${i[1]}%`]);
+              const html = buildTable([`[${status_key} profiles] ${type_key}`, 'Percentage'], rows);
+              if (html) { document.getElementById('stats-tables').insertAdjacentHTML('beforeend', html + '<br>'); hasStats = true; }
+            });
+          }
+          if (typeof val === 'object' && Array.isArray(val) && val.length > 0) {
+            const rows = val.map(i => [i[0], i[1]]);
+            const html = buildTable(['Total','Metadata String'], rows);
+            if (html) { document.getElementById('metadata-table').insertAdjacentHTML('beforeend', html); document.getElementById('metadata-section').style.display = 'block'; }
+          }
+        });
+        if (hasStats) document.getElementById('stats-section').style.display = 'block';
+      }
+
+      // ── Logs
+      if (data.logs && data.logs.length > 0) {
+        document.getElementById('logs-pre').textContent = data.logs;
+        document.getElementById('logs-section').style.display = 'block';
+      }
+
+      // Show export button
+      document.getElementById('btn-save-json').style.display = 'flex';
+
+    } catch(err) {
+      clearInterval(interval_logs);
+      setLoading(false);
+      console.error(err);
+      showToast('Request failed. Check the server and try again.', 'error');
+    }
+  }
+
+  // ── Export ────────────────────────────────────────────────────────
+  function exportJSON() {
+    if (!output_json.username) return;
+    const data = JSON.parse(JSON.stringify(output_json));
+    delete data.graph;
+    const a = document.createElement('a');
+    a.download = `${(data.username||'results').replace(/[^a-z0-9]/gi,'_').toLowerCase()}.json`;
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+    a.click();
+  }
+
+  function exportCSV() {
+    if (!output_json.username) return;
+    const rows = [['Link','Username','Rate','Status','Title','Country','Language','Type','Good']];
+    const all = [...(output_json.user_info_normal.data || []), ...(output_json.user_info_advanced.data || []), ...(output_json.user_info_special.data || [])];
+    all.forEach(s => {
+      if (s.good === 'true' || s.found > 0) {
+        rows.push([s.link||'', s.username||'', s.rate||'', s.status||'', (s.title||'').replace(/,/g,' '), s.country||'', s.language||'', s.type||'', s.good||'']);
       }
     });
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.download = `${(output_json.username||'results').replace(/[^a-z0-9]/gi,'_').toLowerCase()}.csv`;
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.click();
+    showToast('CSV exported', 'success');
+  }
 
-    $(function() {
-      $('.div-header').click(function() {
-        if (this.innerText !== 'Enter Profile Name') {
-          if ($(this).next().hasClass('show')) {
-            $(this).find('.div-right-icon').removeClass('fa-caret-up');
-            $(this).find('.div-right-icon').addClass('fa-caret-down');
-          } else {
-            $(this).find('.div-right-icon').removeClass('fa-caret-down');
-            $(this).find('.div-right-icon').addClass('fa-caret-up');
-          }
-          $(this).next().collapse('toggle');
-        }
+  // ── Settings ──────────────────────────────────────────────────────
+  let settingsModal;
+
+  async function load_settings() {
+    try {
+      const data = await $.ajax({ type: 'GET', url: '/get_settings' });
+      current_settings = data;
+      document.getElementById('user-agent-string').value = data.user_agent || '';
+      document.getElementById('proxy-string').value = data.proxy || '';
+      document.getElementById('google-api-key').value = (data.google || [])[0] || '';
+      document.getElementById('google-api-cs').value  = (data.google || [])[1] || '';
+
+      const list = document.getElementById('detection-options-list');
+      list.innerHTML = '';
+      (data.websites || []).forEach(site => {
+        const li = document.createElement('li');
+        li.className = 'website-item';
+        li.innerHTML = `
+          <input type="checkbox" id="ws-${site.index}" data-index="${site.index}" ${site.selected === 'true' ? 'checked' : ''}>
+          <label for="ws-${site.index}">${site.url}</label>
+          ${site.global_rank ? `<span class="site-rank">#${site.global_rank}</span>` : ''}`;
+        list.appendChild(li);
       });
-    });
-  </script>
+    } catch(e) {
+      showToast('Failed to load settings', 'error');
+    }
+  }
+
+  async function save_settings() {
+    const checked = [...document.querySelectorAll('#detection-options-list input[type=checkbox]:checked')]
+      .map(cb => cb.dataset.index).join(',');
+    try {
+      await $.ajax({
+        type: 'POST',
+        url: '/save_settings',
+        data: {
+          websites: checked,
+          google_key: document.getElementById('google-api-key').value,
+          google_cv:  document.getElementById('google-api-cs').value,
+          user_agent: document.getElementById('user-agent-string').value,
+          proxy:      document.getElementById('proxy-string').value,
+        },
+      });
+      showToast('Settings saved', 'success');
+      settingsModal.hide();
+    } catch(e) {
+      showToast('Failed to save settings', 'error');
+    }
+  }
+
+  // ── Website selection helpers ─────────────────────────────────────
+  function selectByRank(top) {
+    const items = [...document.querySelectorAll('#detection-options-list .website-item')];
+    items.forEach(item => { item.querySelector('input').checked = false; });
+    const sorted = items
+      .map(item => ({ el: item, rank: parseInt(item.querySelector('.site-rank')?.textContent.replace('#','') || 99999) }))
+      .sort((a,b) => a.rank - b.rank);
+    sorted.slice(0, top).forEach(({ el }) => { el.querySelector('input').checked = true; });
+  }
+
+  // ── Event Bindings ────────────────────────────────────────────────
+  $('#analyze-normal').on('click', analyze_string);
+  $('#string-to-analyze').on('keypress', e => { if (e.key === 'Enter') analyze_string(); });
+
+  $('#export-json, #btn-save-json').on('click', exportJSON);
+  $('#export-csv').on('click', exportCSV);
+  $('#reset-everything').on('click', reset_everything);
+  $('#clear-options').on('click', () => { $('#analyzed-options')[0].selectize.clear(); $('#fast-options').removeClass('active'); });
+
+  document.getElementById('btn-open-settings').addEventListener('click', async () => {
+    settingsModal = settingsModal || new bootstrap.Modal(document.getElementById('settings-modal'));
+    await load_settings();
+    settingsModal.show();
+  });
+
+  document.getElementById('save-settings').addEventListener('click', save_settings);
+
+  document.getElementById('settings-select-all').addEventListener('click', () => {
+    document.querySelectorAll('#detection-options-list input[type=checkbox]').forEach(cb => cb.checked = true);
+  });
+  document.getElementById('de-settings-select-all').addEventListener('click', () => {
+    document.querySelectorAll('#detection-options-list input[type=checkbox]').forEach(cb => cb.checked = false);
+  });
+  document.getElementById('select-top-10').addEventListener('click',  () => selectByRank(10));
+  document.getElementById('select-top-50').addEventListener('click',  () => selectByRank(50));
+  document.getElementById('select-top-100').addEventListener('click', () => selectByRank(100));
+
+  // ── Init ──────────────────────────────────────────────────────────
+  renderHistory();
+
+  // Set fast mode on load
+  setTimeout(() => {
+    const sel = $('#analyzed-options')[0].selectize;
+    sel.addItem('FindUserProfilesFast,GetUserProfilesFast');
+    sel.addItem('ExtractPatterns');
+  }, 100);
+</script>
+
 </body>
-
 </html>

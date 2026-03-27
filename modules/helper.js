@@ -75,7 +75,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const sites_json_path = slash(path.join(__dirname, '..', 'data', 'sites.json'))
 const names_json_path = slash(path.join(__dirname, '..', 'data', 'names.json'))
 const dict_json_path = slash(path.join(__dirname, '..', 'data', 'dict.json'))
-const countries_json_path = slash(path.join(__dirname, '..', 'data', 'names.json'))
+const countries_json_path = slash(path.join(__dirname, '..', 'data', 'countries.json'))
 const public_graph_path = slash(path.join(__dirname, '..', 'public', 'graph.html'))
 
 let temp_ixora = new QBIxora('Social-Analyzer', false)
