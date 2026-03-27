@@ -962,6 +962,63 @@
     .toast-item.success { border-left: 3px solid var(--green); }
     .toast-item.error   { border-left: 3px solid var(--red); }
     .toast-item.info    { border-left: 3px solid var(--accent2); }
+
+    /* ─── Page Tabs ──────────────────────────────── */
+    .page-tab {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      padding: 14px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: -1px;
+    }
+
+    .page-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .page-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ─── OSINT Result Cards ─────────────────────── */
+    .recon-result-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .recon-result-row:last-child { border-bottom: none; }
+
+    .recon-key {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      min-width: 120px;
+    }
+
+    .recon-val {
+      font-size: 13px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      word-break: break-all;
+    }
+
+    .recon-val.good { color: var(--green); }
+    .recon-val.bad  { color: var(--red); }
   </style>
 </head>
 <body>
@@ -996,6 +1053,16 @@
     </button>
   </div>
 </nav>
+
+<!-- Tab Bar -->
+<div style="background:var(--bg-secondary);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:0">
+  <button class="page-tab active" id="tab-search" onclick="switchTab('search')">
+    <i class="fa fa-magnifying-glass"></i> Profile Search
+  </button>
+  <button class="page-tab" id="tab-osint" onclick="switchTab('osint')">
+    <i class="fa fa-shield-halved"></i> OSINT Tools
+  </button>
+</div>
 
 <!-- Settings Modal -->
 <div class="modal fade modal-custom" id="settings-modal" tabindex="-1">
@@ -1047,7 +1114,7 @@
 </div>
 
 <!-- Main -->
-<div class="main-wrapper">
+<div class="main-wrapper" id="search-wrapper">
 
   <!-- Hero Search -->
   <div class="hero">
@@ -1301,6 +1368,60 @@
   </div>
 
 </div><!-- /main-wrapper -->
+
+<!-- OSINT Tools Panel -->
+<div id="osint-wrapper" class="main-wrapper" style="display:none">
+
+  <div class="hero" style="margin-bottom:32px">
+    <h1>OSINT <span>Tools</span></h1>
+    <p>Phone number intelligence and IP geolocation — powered by OPRecon.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px">
+
+    <!-- Phone Lookup -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-green"><i class="fa fa-phone"></i></div>
+          <div class="card-title">Phone Number Lookup</div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:14px">Enter a phone number in international format (e.g. +1 212 555 0100)</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input class="input-custom" id="phone-input" type="text" placeholder="+1 212 555 0100" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-phone-lookup" style="white-space:nowrap">
+            <i class="fa fa-search"></i> Lookup
+          </button>
+        </div>
+        <div id="phone-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- IP / Domain Lookup -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-blue"><i class="fa fa-earth-americas"></i></div>
+          <div class="card-title">IP / Domain Geolocation</div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:14px">Enter an IP address or domain name (e.g. 8.8.8.8 or google.com)</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input class="input-custom" id="ip-input" type="text" placeholder="8.8.8.8 or google.com" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-ip-lookup" style="white-space:nowrap">
+            <i class="fa fa-search"></i> Lookup
+          </button>
+        </div>
+        <div id="ip-result" style="display:none"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /osint-wrapper -->
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -1908,6 +2029,114 @@
     sel.addItem('FindUserProfilesFast,GetUserProfilesFast');
     sel.addItem('ExtractPatterns');
   }, 100);
+
+  // ── Tab Switching ─────────────────────────────────────────────────
+  function switchTab(tab) {
+    const search = document.getElementById('search-wrapper');
+    const osint  = document.getElementById('osint-wrapper');
+    if (tab === 'search') {
+      search.style.display = 'block';
+      osint.style.display  = 'none';
+      document.getElementById('tab-search').classList.add('active');
+      document.getElementById('tab-osint').classList.remove('active');
+    } else {
+      search.style.display = 'none';
+      osint.style.display  = 'block';
+      document.getElementById('tab-osint').classList.add('active');
+      document.getElementById('tab-search').classList.remove('active');
+    }
+  }
+
+  // ── OSINT Helpers ─────────────────────────────────────────────────
+  function reconRow(key, val, cls = '') {
+    if (!val && val !== 0) return '';
+    return `<div class="recon-result-row"><div class="recon-key">${key}</div><div class="recon-val ${cls}">${val}</div></div>`;
+  }
+
+  function showReconLoading(el) {
+    el.style.display = 'block';
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)"><div class="loader-ring" style="margin:0 auto 10px"></div>Looking up...</div>';
+  }
+
+  function showReconError(el, msg) {
+    el.style.display = 'block';
+    el.innerHTML = `<div style="padding:14px;color:var(--red);font-size:13px"><i class="fa fa-triangle-exclamation"></i> ${msg}</div>`;
+  }
+
+  // ── Phone Lookup ──────────────────────────────────────────────────
+  document.getElementById('btn-phone-lookup').addEventListener('click', async () => {
+    const number = document.getElementById('phone-input').value.trim();
+    if (!number) { showToast('Please enter a phone number', 'error'); return; }
+    const resultEl = document.getElementById('phone-result');
+    showReconLoading(resultEl);
+
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/phone', data: { number } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+
+      const validClass = data.valid ? 'good' : 'bad';
+      resultEl.innerHTML = `
+        <div style="padding:4px 0">
+          ${reconRow('Valid', data.valid ? 'Yes' : 'No', validClass)}
+          ${reconRow('International', data.international_format)}
+          ${reconRow('National', data.national_format)}
+          ${reconRow('Country', data.country_name)}
+          ${reconRow('Country Code', data.country_code ? '+' + data.country_code : '')}
+          ${reconRow('Location', data.location)}
+          ${reconRow('Carrier', data.carrier)}
+          ${reconRow('Line Type', data.line_type)}
+          ${data.timezones && data.timezones.length ? reconRow('Timezones', data.timezones.join(', ')) : ''}
+        </div>`;
+      showToast('Phone lookup complete', 'success');
+    } catch(e) {
+      showReconError(resultEl, 'Request failed. Please try again.');
+    }
+  });
+
+  document.getElementById('phone-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('btn-phone-lookup').click();
+  });
+
+  // ── IP / Domain Lookup ────────────────────────────────────────────
+  document.getElementById('btn-ip-lookup').addEventListener('click', async () => {
+    const target = document.getElementById('ip-input').value.trim();
+    if (!target) { showToast('Please enter an IP address or domain', 'error'); return; }
+    const resultEl = document.getElementById('ip-result');
+    showReconLoading(resultEl);
+
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/ip', data: { target } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+      if (data.status === 'fail') { showReconError(resultEl, 'Lookup failed for this target'); return; }
+
+      const mapsLink = data.lat && data.lon
+        ? `<a href="https://maps.google.com/?q=${data.lat},${data.lon}" target="_blank" style="color:var(--accent2)">View on Google Maps ↗</a>`
+        : '';
+
+      resultEl.innerHTML = `
+        <div style="padding:4px 0">
+          ${reconRow('IP Address', data.ip)}
+          ${reconRow('Country', data.country + (data.countryCode ? ` (${data.countryCode})` : ''))}
+          ${reconRow('Region', data.regionName || data.region)}
+          ${reconRow('City', data.city)}
+          ${reconRow('ZIP Code', data.zip)}
+          ${reconRow('Latitude', data.lat)}
+          ${reconRow('Longitude', data.lon)}
+          ${reconRow('Timezone', data.timezone)}
+          ${reconRow('ISP', data.isp)}
+          ${reconRow('Organization', data.org)}
+          ${reconRow('AS', data.as_info)}
+          ${mapsLink ? `<div class="recon-result-row"><div class="recon-key">Map</div><div class="recon-val">${mapsLink}</div></div>` : ''}
+        </div>`;
+      showToast('IP lookup complete', 'success');
+    } catch(e) {
+      showReconError(resultEl, 'Request failed. Please try again.');
+    }
+  });
+
+  document.getElementById('ip-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('btn-ip-lookup').click();
+  });
 </script>
 
 </body>

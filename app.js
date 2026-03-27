@@ -79,6 +79,7 @@ if (semver.satisfies(process.version, '>13 || <13')) {
 
 import express from 'express'
 import fs from 'fs'
+import { spawn } from 'child_process'
 import tokenizer from 'wink-tokenizer'
 import generatorics from 'generatorics'
 import HttpsProxyAgent from 'https-proxy-agent'
@@ -544,6 +545,44 @@ app.post('/analyze_string', async function (req, res, next) {
     })
   }
 })
+
+// ── OPRecon Integration ──────────────────────────────────────────────────────
+
+function run_python(script, args) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn('python3', [script, ...args], { cwd: process.cwd() })
+    let stdout = ''
+    let stderr = ''
+    proc.stdout.on('data', d => { stdout += d.toString() })
+    proc.stderr.on('data', d => { stderr += d.toString() })
+    proc.on('close', code => {
+      try {
+        const parsed = JSON.parse(stdout.trim())
+        resolve(parsed)
+      } catch (e) {
+        resolve({ error: stderr || stdout || 'Script error' })
+      }
+    })
+    proc.on('error', err => resolve({ error: err.message }))
+    setTimeout(() => { proc.kill(); resolve({ error: 'Timeout after 30s' }) }, 30000)
+  })
+}
+
+app.post('/api/phone', async function (req, res, next) {
+  const number = (req.body.number || '').trim()
+  if (!number) return res.json({ error: 'No phone number provided' })
+  const result = await run_python('./recon/phone_lookup.py', [number])
+  res.json(result)
+})
+
+app.post('/api/ip', async function (req, res, next) {
+  const target = (req.body.target || '').trim()
+  if (!target) return res.json({ error: 'No target provided' })
+  const result = await run_python('./recon/ip_lookup.py', [target])
+  res.json(result)
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 app.use((err, req, res, next) => {
   helper.verbose && console.log(' --- Global Error ---')

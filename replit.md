@@ -50,3 +50,11 @@ An OSINT (Open Source Intelligence) tool that searches for user profiles across 
 - Word pill visualization for string analysis
 - Fast Mode preset button
 - Cancel task button in loading overlay
+- **OPRecon OSINT Tools tab** with Phone Number Lookup and IP/Domain Geolocation
+
+## OPRecon Integration
+- `recon/phone_lookup.py` — parses and validates phone numbers via the `phonenumbers` Python library; returns country, carrier, line type, timezones
+- `recon/ip_lookup.py` — queries `ip-api.com` (free, no API key); returns ISP, org, ASN, lat/lon, timezone, city
+- `/api/phone` (POST, param: `number`) — spawns the phone lookup script
+- `/api/ip` (POST, param: `target`) — spawns the IP lookup script; accepts IPs and domains
+- Frontend tab: "OSINT Tools" tab in nav bar switches between Profile Search and the two OSINT lookup panels; Enter key and Google Maps link supported

@@ -5,3 +5,10 @@ langdetect
 requests
 lxml
 galeodes
+beautifulsoup4
+colorama
+html5lib
+phonenumbers
+requests
+termcolor
+urllib3
