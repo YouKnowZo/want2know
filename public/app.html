@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Social Analyzer — OSINT Profile Finder</title>
+  <title>Want2Know — OSINT Search by PaperBagExpress</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
   <!-- Bootstrap 5 -->
@@ -17,26 +17,26 @@
 
   <style>
     :root {
-      --bg-primary: #0d1117;
-      --bg-secondary: #161b22;
-      --bg-card: #1c2128;
-      --bg-hover: #21262d;
-      --border: #30363d;
-      --border-light: #3d444d;
-      --accent: #f78166;
-      --accent-hover: #e06b53;
-      --accent2: #58a6ff;
-      --accent2-hover: #388bfd;
-      --text-primary: #e6edf3;
-      --text-secondary: #8b949e;
-      --text-muted: #656d76;
-      --green: #3fb950;
-      --yellow: #d29922;
-      --red: #f85149;
-      --purple: #bc8cff;
-      --radius: 8px;
-      --radius-lg: 12px;
-      --shadow: 0 8px 24px rgba(0,0,0,0.4);
+      --bg-primary: #F5F5F7;
+      --bg-secondary: #FFFFFF;
+      --bg-card: #FFFFFF;
+      --bg-hover: #F2F2F7;
+      --border: #D1D1D6;
+      --border-light: #C7C7CC;
+      --accent: #0066CC;
+      --accent-hover: #004FA3;
+      --accent2: #30A9DE;
+      --accent2-hover: #1E8AB5;
+      --text-primary: #1D1D1F;
+      --text-secondary: #3A3A3C;
+      --text-muted: #8E8E93;
+      --green: #34C759;
+      --yellow: #FF9500;
+      --red: #FF3B30;
+      --purple: #AF52DE;
+      --radius: 10px;
+      --radius-lg: 14px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -178,11 +178,12 @@
       max-width: 700px;
       margin: 0 auto;
       transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
     }
 
     .search-bar:focus-within {
-      border-color: var(--accent2);
-      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
     }
 
     .search-bar .search-icon {
@@ -298,14 +299,14 @@
     }
 
     .selectize-control.multi .selectize-input.focus {
-      border-color: var(--accent2) !important;
-      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15) !important;
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15) !important;
     }
 
     .selectize-control.multi .selectize-input > .item {
-      background: #1f3a5f !important;
-      color: var(--accent2) !important;
-      border: 1px solid rgba(88,166,255,0.3) !important;
+      background: #EBF3FF !important;
+      color: var(--accent) !important;
+      border: 1px solid rgba(0,102,204,0.3) !important;
       border-radius: 4px !important;
       font-size: 11px;
       padding: 2px 8px !important;
@@ -357,6 +358,7 @@
       border-radius: var(--radius-lg);
       margin-bottom: 20px;
       overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
     .card-header-custom {
@@ -389,12 +391,12 @@
       font-size: 13px;
     }
 
-    .card-icon-orange { background: rgba(247,129,102,0.15); color: var(--accent); }
-    .card-icon-blue   { background: rgba(88,166,255,0.15);  color: var(--accent2); }
-    .card-icon-green  { background: rgba(63,185,80,0.15);   color: var(--green); }
-    .card-icon-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
-    .card-icon-yellow { background: rgba(210,153,34,0.15);  color: var(--yellow); }
-    .card-icon-red    { background: rgba(248,81,73,0.15);   color: var(--red); }
+    .card-icon-orange { background: rgba(255,149,0,0.12);   color: var(--yellow); }
+    .card-icon-blue   { background: rgba(0,102,204,0.10);   color: var(--accent); }
+    .card-icon-green  { background: rgba(52,199,89,0.12);   color: var(--green); }
+    .card-icon-purple { background: rgba(175,82,222,0.12);  color: var(--purple); }
+    .card-icon-yellow { background: rgba(255,149,0,0.12);   color: var(--yellow); }
+    .card-icon-red    { background: rgba(255,59,48,0.10);   color: var(--red); }
 
     .card-title {
       font-size: 14px;
@@ -437,7 +439,7 @@
 
     .profile-item:last-child { border-bottom: none; }
 
-    .profile-item:hover { background: rgba(255,255,255,0.02); }
+    .profile-item:hover { background: rgba(0,0,0,0.02); }
 
     .profile-favicon {
       width: 36px;
@@ -490,7 +492,7 @@
     .tag-yellow { background: rgba(210,153,34,0.12); color: var(--yellow); border: 1px solid rgba(210,153,34,0.25); }
     .tag-red    { background: rgba(248,81,73,0.12);  color: var(--red);    border: 1px solid rgba(248,81,73,0.25); }
     .tag-gray   { background: rgba(139,148,158,0.12);color: var(--text-secondary); border: 1px solid rgba(139,148,158,0.25); }
-    .tag-blue   { background: rgba(88,166,255,0.12); color: var(--accent2); border: 1px solid rgba(88,166,255,0.25); }
+    .tag-blue   { background: rgba(0,102,204,0.08);  color: var(--accent);  border: 1px solid rgba(0,102,204,0.20); }
     .tag-purple { background: rgba(188,140,255,0.12);color: var(--purple);  border: 1px solid rgba(188,140,255,0.25); }
 
     .profile-detail {
@@ -566,7 +568,7 @@
     }
 
     .data-table tr:last-child td { border-bottom: none; }
-    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .data-table tr:hover td { background: rgba(0,102,204,0.03); }
 
     .data-table a {
       color: var(--accent2);
@@ -606,17 +608,17 @@
     }
 
     .word-pill:hover {
-      border-color: var(--accent2);
-      color: var(--accent2);
-      background: rgba(88,166,255,0.08);
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,102,204,0.06);
     }
 
     /* ─── Loading Overlay ────────────────────────── */
     .loading-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(13,17,23,0.92);
-      backdrop-filter: blur(4px);
+      background: rgba(245,245,247,0.94);
+      backdrop-filter: blur(6px);
       z-index: 9999;
       display: none;
       align-items: center;
@@ -790,7 +792,8 @@
     }
 
     .modal-custom .btn-close {
-      filter: invert(1) opacity(0.5);
+      filter: none;
+      opacity: 0.6;
     }
 
     .form-label-custom {
@@ -817,8 +820,8 @@
     }
 
     .input-custom:focus {
-      border-color: var(--accent2);
-      box-shadow: 0 0 0 3px rgba(88,166,255,0.1);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,102,204,0.1);
     }
 
     .input-custom::placeholder { color: var(--text-muted); }
@@ -1039,12 +1042,15 @@
 <nav class="navbar-custom">
   <a class="navbar-brand-custom" href="#">
     <div class="navbar-logo"><i class="fa-solid fa-magnifying-glass"></i></div>
-    <span class="navbar-title">Social<span>Analyzer</span></span>
+    <div>
+      <span class="navbar-title">Want2<span>Know</span></span>
+      <div style="font-size:9px;font-weight:500;color:var(--text-muted);letter-spacing:0.3px;margin-top:-2px">by PaperBagExpress</div>
+    </div>
   </a>
   <div class="navbar-actions">
-    <a class="nav-icon-btn" href="https://github.com/qeeqbox/social-analyzer" target="_blank" title="GitHub">
-      <i class="fab fa-github"></i>
-    </a>
+    <button class="nav-icon-btn" id="btn-disclaimer" title="Legal Disclaimer" style="font-size:12px;gap:4px;width:auto;padding:0 10px">
+      <i class="fa fa-shield-halved"></i><span style="font-size:11px;font-weight:600">Legal</span>
+    </button>
     <button class="nav-icon-btn" id="btn-open-settings" title="Settings">
       <i class="fa fa-gear"></i>
     </button>
@@ -1118,8 +1124,8 @@
 
   <!-- Hero Search -->
   <div class="hero">
-    <h1>Find Profiles <span>Anywhere</span></h1>
-    <p>Search for a username across 1000+ social media platforms using OSINT techniques.</p>
+    <h1>Find Profiles <span>Everywhere</span></h1>
+    <p>Search any username across 1000+ platforms — social media, forums, gaming, and more.</p>
 
     <div class="search-bar">
       <i class="fa fa-magnifying-glass search-icon"></i>
@@ -1140,6 +1146,12 @@
 
     <!-- Search history -->
     <div class="history-chips" id="history-chips"></div>
+
+    <!-- Responsible Use Notice -->
+    <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <i class="fa fa-shield-halved" style="color:var(--accent);font-size:11px"></i>
+      <span style="font-size:11px;color:var(--text-muted)">For authorized &amp; educational use only. <button onclick="document.getElementById('btn-disclaimer').click()" style="background:none;border:none;color:var(--accent);font-size:11px;cursor:pointer;padding:0;font-family:'Inter',sans-serif">View Legal Terms</button></span>
+    </div>
   </div>
 
   <!-- Results area (hidden until results come in) -->
@@ -1369,6 +1381,67 @@
 
 </div><!-- /main-wrapper -->
 
+<!-- Disclaimer Modal -->
+<div class="modal fade modal-custom" id="disclaimer-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:var(--accent);border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+        <h5 class="modal-title" style="color:white"><i class="fa fa-shield-halved me-2"></i>Legal Disclaimer &amp; Terms of Use</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px;max-height:70vh;overflow-y:auto">
+
+        <div style="background:#FFF8E7;border:1px solid #FFD700;border-radius:8px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start">
+          <i class="fa fa-triangle-exclamation" style="color:#FF9500;margin-top:2px;flex-shrink:0"></i>
+          <div>
+            <strong style="color:#1D1D1F;font-size:13px">Important Notice</strong>
+            <p style="color:#3A3A3C;font-size:12px;margin:4px 0 0">By using Want2Know, you acknowledge that you have read, understood, and agree to these terms. Unauthorized or unethical use of this tool may violate local, state, federal, and international laws.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:18px">
+
+          <section>
+            <h6 style="color:var(--accent);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px"><i class="fa fa-circle-info me-1"></i> Purpose &amp; Scope</h6>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Want2Know by PaperBagExpress is an open-source intelligence (OSINT) tool designed to help individuals and security professionals discover publicly available information. It aggregates data from publicly accessible sources only — it does not hack, scrape private data, or bypass access controls.</p>
+          </section>
+
+          <section>
+            <h6 style="color:var(--red);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px"><i class="fa fa-ban me-1"></i> Prohibited Uses</h6>
+            <ul style="font-size:13px;color:var(--text-secondary);line-height:1.8;padding-left:18px;margin:0">
+              <li>Stalking, harassing, or threatening any individual</li>
+              <li>Building profiles to discriminate based on protected characteristics</li>
+              <li>Any activity that violates the Computer Fraud and Abuse Act (CFAA), GDPR, CCPA, or similar laws</li>
+              <li>Unauthorized investigation of private individuals without legal authority</li>
+              <li>Using results in legal proceedings without independent verification</li>
+            </ul>
+          </section>
+
+          <section>
+            <h6 style="color:var(--yellow);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px"><i class="fa fa-scale-balanced me-1"></i> Limitation of Liability</h6>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">PaperBagExpress and the Want2Know tool are provided <strong>"as is"</strong> without warranty of any kind. We are not responsible for the accuracy, completeness, or legality of any information retrieved. The user assumes full responsibility for all actions taken using this tool. PaperBagExpress shall not be liable for any direct, indirect, incidental, special, or consequential damages resulting from the use or misuse of this service.</p>
+          </section>
+
+          <section>
+            <h6 style="color:var(--green);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px"><i class="fa fa-user-shield me-1"></i> Privacy</h6>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Want2Know does not store search queries, results, or any personally identifiable information on our servers. All lookups are performed in real-time and data is not retained. Search history is stored locally in your browser only and never transmitted.</p>
+          </section>
+
+          <section>
+            <h6 style="color:var(--purple);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px"><i class="fa fa-file-contract me-1"></i> Acceptance</h6>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">By using this tool, you affirm that you are at least 18 years of age, that you have the legal right to search for the information you are looking for, and that your use complies with all applicable laws in your jurisdiction. If you do not agree with these terms, do not use this service.</p>
+          </section>
+
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:space-between;align-items:center">
+        <span style="font-size:11px;color:var(--text-muted)">© 2025 PaperBagExpress. All rights reserved.</span>
+        <button class="btn-primary-custom" data-bs-dismiss="modal">I Understand &amp; Accept</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- OSINT Tools Panel -->
 <div id="osint-wrapper" class="main-wrapper" style="display:none">
 
@@ -1422,6 +1495,20 @@
   </div>
 
 </div><!-- /osint-wrapper -->
+
+<!-- Footer -->
+<footer style="background:var(--bg-secondary);border-top:1px solid var(--border);padding:20px 24px;text-align:center;margin-top:0">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">
+    <div style="font-size:12px;color:var(--text-muted)">
+      <strong style="color:var(--text-secondary)">Want2Know</strong> by PaperBagExpress &nbsp;·&nbsp; For authorized &amp; educational use only
+    </div>
+    <div style="display:flex;gap:16px;align-items:center">
+      <button onclick="document.getElementById('btn-disclaimer').click()" style="background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;padding:0">Legal Disclaimer</button>
+      <span style="color:var(--border)">|</span>
+      <span style="font-size:12px;color:var(--text-muted)">Data sourced from public records only</span>
+    </div>
+  </div>
+</footer>
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -2020,6 +2107,20 @@
   document.getElementById('select-top-50').addEventListener('click',  () => selectByRank(50));
   document.getElementById('select-top-100').addEventListener('click', () => selectByRank(100));
 
+  // ── Disclaimer Modal ──────────────────────────────────────────────
+  const disclaimerModal = new bootstrap.Modal(document.getElementById('disclaimer-modal'));
+  document.getElementById('btn-disclaimer').addEventListener('click', () => disclaimerModal.show());
+
+  // Show disclaimer on first visit
+  if (!localStorage.getItem('w2k_disclaimer_accepted')) {
+    setTimeout(() => {
+      disclaimerModal.show();
+      document.getElementById('disclaimer-modal').addEventListener('hidden.bs.modal', () => {
+        localStorage.setItem('w2k_disclaimer_accepted', '1');
+      }, { once: true });
+    }, 800);
+  }
+
   // ── Init ──────────────────────────────────────────────────────────
   renderHistory();
 
@@ -2075,17 +2176,24 @@
       if (data.error) { showReconError(resultEl, data.error); return; }
 
       const validClass = data.valid ? 'good' : 'bad';
+      const rows = [
+        ['Valid', data.valid ? 'Yes' : 'No', validClass],
+        ['International', data.international_format],
+        ['National', data.national_format],
+        ['Country', data.country_name],
+        ['Country Code', data.country_code ? '+' + data.country_code : ''],
+        ['Location', data.location],
+        ['Carrier', data.carrier],
+        ['Line Type', data.line_type],
+        ...(data.timezones && data.timezones.length ? [['Timezones', data.timezones.join(', ')]] : [])
+      ];
+      const copyText = rows.filter(r => r[1]).map(r => `${r[0]}: ${r[1]}`).join('\n');
       resultEl.innerHTML = `
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+          <button onclick="navigator.clipboard.writeText(${JSON.stringify(copyText)}).then(()=>showToast('Copied!','success'))" style="background:var(--bg-hover);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text-secondary);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px"><i class='fa fa-copy'></i> Copy</button>
+        </div>
         <div style="padding:4px 0">
-          ${reconRow('Valid', data.valid ? 'Yes' : 'No', validClass)}
-          ${reconRow('International', data.international_format)}
-          ${reconRow('National', data.national_format)}
-          ${reconRow('Country', data.country_name)}
-          ${reconRow('Country Code', data.country_code ? '+' + data.country_code : '')}
-          ${reconRow('Location', data.location)}
-          ${reconRow('Carrier', data.carrier)}
-          ${reconRow('Line Type', data.line_type)}
-          ${data.timezones && data.timezones.length ? reconRow('Timezones', data.timezones.join(', ')) : ''}
+          ${rows.map(r => reconRow(r[0], r[1], r[2] || '')).join('')}
         </div>`;
       showToast('Phone lookup complete', 'success');
     } catch(e) {
@@ -2113,19 +2221,26 @@
         ? `<a href="https://maps.google.com/?q=${data.lat},${data.lon}" target="_blank" style="color:var(--accent2)">View on Google Maps ↗</a>`
         : '';
 
+      const ipRows = [
+        ['IP Address', data.ip],
+        ['Country', data.country + (data.countryCode ? ` (${data.countryCode})` : '')],
+        ['Region', data.regionName || data.region],
+        ['City', data.city],
+        ['ZIP Code', data.zip],
+        ['Latitude', String(data.lat)],
+        ['Longitude', String(data.lon)],
+        ['Timezone', data.timezone],
+        ['ISP', data.isp],
+        ['Organization', data.org],
+        ['AS', data.as_info]
+      ];
+      const ipCopyText = ipRows.filter(r => r[1] && r[1] !== 'undefined').map(r => `${r[0]}: ${r[1]}`).join('\n');
       resultEl.innerHTML = `
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+          <button onclick="navigator.clipboard.writeText(${JSON.stringify(ipCopyText)}).then(()=>showToast('Copied!','success'))" style="background:var(--bg-hover);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text-secondary);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px"><i class='fa fa-copy'></i> Copy</button>
+        </div>
         <div style="padding:4px 0">
-          ${reconRow('IP Address', data.ip)}
-          ${reconRow('Country', data.country + (data.countryCode ? ` (${data.countryCode})` : ''))}
-          ${reconRow('Region', data.regionName || data.region)}
-          ${reconRow('City', data.city)}
-          ${reconRow('ZIP Code', data.zip)}
-          ${reconRow('Latitude', data.lat)}
-          ${reconRow('Longitude', data.lon)}
-          ${reconRow('Timezone', data.timezone)}
-          ${reconRow('ISP', data.isp)}
-          ${reconRow('Organization', data.org)}
-          ${reconRow('AS', data.as_info)}
+          ${ipRows.map(r => reconRow(r[0], r[1])).join('')}
           ${mapsLink ? `<div class="recon-result-row"><div class="recon-key">Map</div><div class="recon-val">${mapsLink}</div></div>` : ''}
         </div>`;
       showToast('IP lookup complete', 'success');
