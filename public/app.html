@@ -4,6 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Want2Know — OSINT Search by PaperBagExpress</title>
+  <meta name="description" content="Search any username across 1000+ platforms — social media, forums, gaming, and more. Free OSINT tool by PaperBagExpress." />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0066CC" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="Want2Know — OSINT Search by PaperBagExpress" />
+  <meta property="og:description" content="Search any username across 1000+ platforms — social media, forums, gaming, and more." />
+  <meta property="og:image"       content="/favicon.svg" />
+  <meta property="og:url"         content="https://want2know.replit.app" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Want2Know — OSINT Search" />
+  <meta name="twitter:description" content="Search any username across 1000+ social platforms instantly." />
+  <meta name="twitter:image"       content="/favicon.svg" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
+
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
   <!-- Bootstrap 5 -->
@@ -1186,6 +1207,181 @@
       .hero h1 { font-size: 22px; }
     }
 
+    /* ─── Skeleton Loading ───────────────────────── */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position: 600px 0; }
+    }
+
+    .skeleton-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+
+    .skeleton-header {
+      height: 56px;
+      background: var(--bg-hover);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .skeleton-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .skeleton-item:last-child { border-bottom: none; }
+
+    .skeleton-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .skeleton-line {
+      border-radius: 4px;
+      height: 11px;
+    }
+
+    .skeleton-line.wide  { width: 60%; }
+    .skeleton-line.short { width: 35%; margin-top: 6px; }
+
+    .skeleton-avatar,
+    .skeleton-header,
+    .skeleton-line {
+      background: linear-gradient(90deg, var(--bg-hover) 25%, var(--border-light) 50%, var(--bg-hover) 75%);
+      background-size: 600px 100%;
+      animation: shimmer 1.4s infinite linear;
+    }
+
+    body.dark-mode .skeleton-avatar,
+    body.dark-mode .skeleton-header,
+    body.dark-mode .skeleton-line {
+      background: linear-gradient(90deg, #21262d 25%, #30363d 50%, #21262d 75%);
+      background-size: 600px 100%;
+      animation: shimmer 1.4s infinite linear;
+    }
+
+    /* ─── Empty State ────────────────────────────── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .empty-state-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--bg-hover);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .empty-state h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+
+    /* ─── Lightbox ───────────────────────────────── */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+      padding: 24px;
+    }
+
+    .lightbox-overlay.active { display: flex; }
+
+    .lightbox-overlay img {
+      max-width: 90vw;
+      max-height: 86vh;
+      border-radius: 10px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+      object-fit: contain;
+      cursor: default;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      color: white;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+
+    .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+    .profile-image-thumb { cursor: zoom-in; }
+
+    /* ─── Offline Banner ─────────────────────────── */
+    .offline-banner {
+      background: var(--red);
+      color: white;
+      padding: 8px 20px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 1100;
+    }
+
+    .offline-banner.show { display: flex; }
+
+    /* ─── Live counter in loader ─────────────────── */
+    .loading-counter {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 18px;
+    }
+
     /* ─── Print Support ──────────────────────────── */
     @media print {
       .navbar-custom, .tab-bar, footer, .loading-overlay,
@@ -1198,10 +1394,22 @@
 <body>
 
 <!-- Loading Overlay -->
-<div class="loading-overlay" id="loading-overlay">
+<!-- Offline Banner -->
+<div class="offline-banner" id="offline-banner" role="alert" aria-live="polite">
+  <i class="fa fa-wifi-slash"></i> You're offline — results may not load until connection is restored.
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightbox-overlay" role="dialog" aria-label="Image preview" tabindex="-1">
+  <button class="lightbox-close" id="lightbox-close" aria-label="Close image preview"><i class="fa fa-times"></i></button>
+  <img id="lightbox-img" src="" alt="Profile image" />
+</div>
+
+<div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite">
   <div class="loader-ring"></div>
   <div class="loading-status" id="loading-status">Starting analysis...</div>
-  <button class="btn-cancel-loading" id="btn-cancel-loading">
+  <div class="loading-counter" id="loading-counter"></div>
+  <button class="btn-cancel-loading" id="btn-cancel-loading" aria-label="Cancel analysis task">
     <i class="fa fa-times"></i> Cancel Task
   </button>
 </div>
@@ -1219,19 +1427,19 @@
     </div>
   </a>
   <div class="navbar-actions">
-    <a class="nav-icon-btn" href="https://github.com/youknowzo" target="_blank" title="GitHub @youknowzo">
-      <i class="fab fa-github"></i>
+    <a class="nav-icon-btn" href="https://github.com/youknowzo" target="_blank" title="GitHub @youknowzo" aria-label="Visit GitHub profile @youknowzo">
+      <i class="fab fa-github" aria-hidden="true"></i>
     </a>
-    <button class="nav-icon-btn" id="btn-dark-mode" title="Toggle Dark Mode">
-      <i class="fa fa-moon" id="dark-mode-icon"></i>
+    <button class="nav-icon-btn" id="btn-dark-mode" title="Toggle Dark Mode" aria-label="Toggle dark mode">
+      <i class="fa fa-moon" id="dark-mode-icon" aria-hidden="true"></i>
     </button>
-    <button class="nav-icon-btn" id="btn-about" title="About Want2Know" style="font-size:12px;gap:4px;width:auto;padding:0 10px">
-      <i class="fa fa-circle-info"></i><span style="font-size:11px;font-weight:600">About</span>
+    <button class="nav-icon-btn" id="btn-about" title="About Want2Know" aria-label="About Want2Know" style="font-size:12px;gap:4px;width:auto;padding:0 10px">
+      <i class="fa fa-circle-info" aria-hidden="true"></i><span style="font-size:11px;font-weight:600">About</span>
     </button>
-    <button class="nav-icon-btn" id="btn-disclaimer" title="Legal Disclaimer" style="font-size:12px;gap:4px;width:auto;padding:0 10px">
-      <i class="fa fa-shield-halved"></i><span style="font-size:11px;font-weight:600">Legal</span>
+    <button class="nav-icon-btn" id="btn-disclaimer" title="Legal Disclaimer" aria-label="View legal disclaimer" style="font-size:12px;gap:4px;width:auto;padding:0 10px">
+      <i class="fa fa-shield-halved" aria-hidden="true"></i><span style="font-size:11px;font-weight:600">Legal</span>
     </button>
-    <button class="nav-icon-btn" id="btn-open-settings" title="Settings">
+    <button class="nav-icon-btn" id="btn-open-settings" title="Settings" aria-label="Open settings">
       <i class="fa fa-gear"></i>
     </button>
     <button class="nav-icon-btn" id="btn-save-json" title="Export JSON" style="display:none">
@@ -1956,12 +2164,37 @@
   let global_uuid = '';
   let profileData = [];
   let current_settings = [];
+  let liveFoundCount = 0;
 
   function setLoading(on, text = 'Analyzing...', showCancel = false) {
     const ov = document.getElementById('loading-overlay');
     document.getElementById('loading-status').textContent = text;
     document.getElementById('btn-cancel-loading').style.display = showCancel ? 'block' : 'none';
+    if (on) {
+      liveFoundCount = 0;
+      document.getElementById('loading-counter').textContent = '';
+      showSkeletons();
+    } else {
+      hideSkeletons();
+    }
     ov.classList.toggle('active', on);
+  }
+
+  function skeletonItem() {
+    return `<div class="skeleton-item"><div class="skeleton-avatar"></div><div style="flex:1"><div class="skeleton-line wide"></div><div class="skeleton-line short"></div></div></div>`;
+  }
+
+  function showSkeletons() {
+    const sec = document.getElementById('output-section-3');
+    const body = document.getElementById('output-table-3');
+    sec.style.display = 'block';
+    body.innerHTML = `<div id="skeleton-wrapper">${skeletonItem().repeat(6)}</div>`;
+    document.getElementById('profile-filter-bar').style.display = 'none';
+  }
+
+  function hideSkeletons() {
+    const sw = document.getElementById('skeleton-wrapper');
+    if (sw) sw.remove();
   }
 
   function get_logs(uuid) {
@@ -1969,6 +2202,15 @@
       .done(data => {
         if (data && data !== 'Error' && data !== 'nothinghere' && data !== 'nothing_here_error') {
           document.getElementById('loading-status').textContent = data;
+          // Parse live found count from log messages
+          const m = String(data).match(/found[:\s]+(\d+)|(\d+)\s+found|\[(\d+)\]/i);
+          if (m) {
+            const n = parseInt(m[1] || m[2] || m[3]);
+            if (!isNaN(n) && n > liveFoundCount) {
+              liveFoundCount = n;
+              document.getElementById('loading-counter').textContent = `${liveFoundCount} profile${liveFoundCount !== 1 ? 's' : ''} found so far`;
+            }
+          }
         } else if (data === 'nothing_here_error' || data === 'Error') {
           clearInterval(interval_logs);
         }
@@ -2135,13 +2377,24 @@
             profileData.push({ rate: rateNum, platform: site.title || site.link || '', _html: buildProfileItem(site, cls) });
           }
         });
-        renderProfiles();
-        document.getElementById('profile-filter-bar').style.display = profileData.length > 0 ? 'flex' : 'none';
+        if (profileData.length > 0) {
+          renderProfiles();
+          document.getElementById('profile-filter-bar').style.display = 'flex';
+          showToast(`Found ${normalFound} profile${normalFound !== 1 ? 's' : ''}`, 'success');
+        } else {
+          document.getElementById('output-table-3').innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon"><i class="fa fa-user-slash"></i></div>
+              <h4>No profiles detected</h4>
+              <p>No public profiles were found for <strong>"${query}"</strong>. Try a different username or enable more scan options.</p>
+            </div>`;
+          document.getElementById('profile-filter-bar').style.display = 'none';
+          showToast(`No profiles found for "${query}"`, 'info');
+        }
         document.getElementById('count-normal').textContent = normalFound;
         document.getElementById('output-section-3').style.display = 'block';
         saveLastResult(query, profileData);
         checkRestoreBanner();
-        showToast(`Found ${normalFound} profile${normalFound !== 1 ? 's' : ''}`, 'success');
       }
 
       // ── Slow profiles
@@ -2289,18 +2542,25 @@
   }
 
   // ── Export ────────────────────────────────────────────────────────
+  function exportTimestamp() {
+    const d = new Date();
+    return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
   function exportJSON() {
-    if (!output_json.username) return;
+    if (!output_json.username) { showToast('No results to export yet', 'error'); return; }
     const data = JSON.parse(JSON.stringify(output_json));
     delete data.graph;
+    const name = (data.username||'results').replace(/[^a-z0-9]/gi,'_').toLowerCase();
     const a = document.createElement('a');
-    a.download = `${(data.username||'results').replace(/[^a-z0-9]/gi,'_').toLowerCase()}.json`;
+    a.download = `w2k_${name}_${exportTimestamp()}.json`;
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
     a.click();
+    showToast(`Exported ${name}.json`, 'success');
   }
 
   function exportCSV() {
-    if (!output_json.username) return;
+    if (!output_json.username) { showToast('No results to export yet', 'error'); return; }
     const rows = [['Link','Username','Rate','Status','Title','Country','Language','Type','Good']];
     const all = [...(output_json.user_info_normal.data || []), ...(output_json.user_info_advanced.data || []), ...(output_json.user_info_special.data || [])];
     all.forEach(s => {
@@ -2309,11 +2569,12 @@
       }
     });
     const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const name = (output_json.username||'results').replace(/[^a-z0-9]/gi,'_').toLowerCase();
     const a = document.createElement('a');
-    a.download = `${(output_json.username||'results').replace(/[^a-z0-9]/gi,'_').toLowerCase()}.csv`;
+    a.download = `w2k_${name}_${exportTimestamp()}.csv`;
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.click();
-    showToast('CSV exported', 'success');
+    showToast(`Exported ${rows.length - 1} profiles as CSV`, 'success');
   }
 
   // ── Settings ──────────────────────────────────────────────────────
@@ -2714,6 +2975,77 @@
 
   document.getElementById('sort-profiles').addEventListener('change', renderProfiles);
 
+  // ── Keyboard Shortcut: Cmd/Ctrl + K ──────────────────────────────
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      const inp = document.getElementById('string-to-analyze');
+      if (inp) {
+        // Make sure we're on the search tab
+        const sw = document.getElementById('search-wrapper');
+        if (sw && sw.style.display === 'none') switchTab('search');
+        inp.focus();
+        inp.select();
+      }
+    }
+    // Escape closes lightbox
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  // ── Profile Image Lightbox ────────────────────────────────────────
+  function openLightbox(src) {
+    const overlay = document.getElementById('lightbox-overlay');
+    document.getElementById('lightbox-img').src = src;
+    overlay.classList.add('active');
+    overlay.focus();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    const overlay = document.getElementById('lightbox-overlay');
+    overlay.classList.remove('active');
+    document.getElementById('lightbox-img').src = '';
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('lightbox-overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeLightbox();
+  });
+
+  document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+
+  // Delegate clicks on profile thumbnails
+  document.getElementById('output-table-3').addEventListener('click', e => {
+    const img = e.target.closest('.profile-image-thumb');
+    if (img && img.src) openLightbox(img.src);
+  });
+
+  document.getElementById('output-table-2').addEventListener('click', e => {
+    const img = e.target.closest('.profile-image-thumb');
+    if (img && img.src) openLightbox(img.src);
+  });
+
+  // ── Offline Detection ─────────────────────────────────────────────
+  function updateOnlineStatus() {
+    const banner = document.getElementById('offline-banner');
+    if (!navigator.onLine) {
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+
+  window.addEventListener('online',  updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
+  // ── PWA Install Prompt ────────────────────────────────────────────
+  let deferredInstallPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+  });
 
 </script>
 
