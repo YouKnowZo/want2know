@@ -1,7 +1,7 @@
 # Want2Know by PaperBagExpress
 
 ## Overview
-Want2Know is an OSINT (Open Source Intelligence) tool by PaperBagExpress that searches for user profiles across 1000+ social media platforms. Provides a modern light-theme web UI, CLI, and Python library interface. Includes phone number lookup and IP/domain geolocation tools.
+Want2Know is an OSINT (Open Source Intelligence) tool by PaperBagExpress that searches for user profiles across 1000+ social media platforms. Provides a modern light-theme web UI, CLI, and Python library interface. Includes phone number lookup, IP/domain geolocation, and WHOIS/RDAP domain lookup tools. Features dark mode, result persistence, filter/sort for detected profiles, About modal, slow scan warning, and rate limiting.
 
 ## Architecture
 - **Backend**: Node.js + Express.js (`app.js`)

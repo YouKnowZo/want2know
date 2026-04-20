@@ -105,11 +105,22 @@ import stats from './modules/stats.js'
 
 const app = express()
 app.set('etag', false)
-app.use(express.urlencoded({
-  extended: true
-}))
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(express.static('public'))
+
+// ── In-memory rate limiter ────────────────────────────────────────────────────
+const _rl = {}
+const RL_MAX = 15
+const RL_WIN = 60000
+function isRateLimited(ip) {
+  const now = Date.now()
+  if (!_rl[ip] || now > _rl[ip].reset) { _rl[ip] = { count: 1, reset: now + RL_WIN }; return false }
+  if (_rl[ip].count >= RL_MAX) return true
+  _rl[ip].count++
+  return false
+}
+setInterval(() => { const now = Date.now(); Object.keys(_rl).forEach(ip => { if (now > _rl[ip].reset) delete _rl[ip] }) }, 120000)
 
 app.get('/', (req, res) => {
   res.redirect('/app.html')
@@ -240,6 +251,9 @@ app.post('/cancel', async function (req, res, next) {
 })
 
 app.post('/analyze_string', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) {
+    return res.json({ error: 'Rate limit exceeded. Please wait 1 minute before searching again.' })
+  }
   let username = ''
   let temp_uuid = ''
   const info = {
@@ -569,6 +583,7 @@ function run_python(script, args) {
 }
 
 app.post('/api/phone', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
   const number = (req.body.number || '').trim()
   if (!number) return res.json({ error: 'No phone number provided' })
   const result = await run_python('./recon/phone_lookup.py', [number])
@@ -576,9 +591,18 @@ app.post('/api/phone', async function (req, res, next) {
 })
 
 app.post('/api/ip', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
   const target = (req.body.target || '').trim()
   if (!target) return res.json({ error: 'No target provided' })
   const result = await run_python('./recon/ip_lookup.py', [target])
+  res.json(result)
+})
+
+app.post('/api/whois', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const target = (req.body.target || '').trim()
+  if (!target) return res.json({ error: 'No target provided' })
+  const result = await run_python('./recon/whois_lookup.py', [target])
   res.json(result)
 })
 

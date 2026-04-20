@@ -1022,6 +1022,177 @@
 
     .recon-val.good { color: var(--green); }
     .recon-val.bad  { color: var(--red); }
+
+    /* ─── Dark Mode Override ─────────────────────── */
+    body.dark-mode {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-card: #1c2128;
+      --bg-hover: #21262d;
+      --border: #30363d;
+      --border-light: #3d444d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #656d76;
+      --shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    body.dark-mode .loading-overlay { background: rgba(13,17,23,0.94); }
+    body.dark-mode .modal-custom .btn-close { filter: invert(1) opacity(0.6); }
+    body.dark-mode .tag-green  { background: rgba(63,185,80,0.12);  }
+    body.dark-mode .tag-yellow { background: rgba(210,153,34,0.12); }
+    body.dark-mode .tag-red    { background: rgba(248,81,73,0.12);  }
+    body.dark-mode .tag-blue   { background: rgba(88,166,255,0.12); color: #58a6ff; border-color: rgba(88,166,255,0.25); }
+    body.dark-mode .card-icon-orange { background: rgba(247,129,102,0.15); color: #f78166; }
+    body.dark-mode .card-icon-blue   { background: rgba(88,166,255,0.15);  color: #58a6ff; }
+    body.dark-mode .card-icon-green  { background: rgba(63,185,80,0.15);   color: #3fb950; }
+    body.dark-mode .card-icon-purple { background: rgba(188,140,255,0.15); color: #bc8cff; }
+    body.dark-mode .card-icon-yellow { background: rgba(210,153,34,0.15);  color: #d29922; }
+    body.dark-mode .card-icon-red    { background: rgba(248,81,73,0.15);   color: #f85149; }
+    body.dark-mode .selectize-control.multi .selectize-input > .item { background: #1f3a5f !important; color: #58a6ff !important; border-color: rgba(88,166,255,0.3) !important; }
+    body.dark-mode .profile-item:hover { background: rgba(255,255,255,0.02); }
+    body.dark-mode .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* ─── Filter Bar ─────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--bg-hover);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .sort-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-left: auto;
+      outline: none;
+    }
+
+    .sort-select:focus { border-color: var(--accent); }
+
+    /* ─── Confidence Bar ─────────────────────────── */
+    .conf-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .conf-bar {
+      width: 60px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .conf-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+
+    .conf-label {
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 28px;
+      text-align: right;
+    }
+
+    /* ─── Last Result Banner ─────────────────────── */
+    .restore-banner {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .restore-banner button {
+      background: white;
+      color: var(--accent);
+      border: none;
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .restore-banner .dismiss-btn {
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+    }
+
+    /* ─── Slow Scan Warning ──────────────────────── */
+    .slow-scan-note {
+      background: rgba(255,149,0,0.08);
+      border: 1px solid rgba(255,149,0,0.25);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--yellow);
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* ─── Improved Mobile ────────────────────────── */
+    @media (max-width: 600px) {
+      .filter-bar { gap: 6px; }
+      .sort-select { margin-left: 0; width: 100%; }
+      .restore-banner { flex-direction: column; align-items: flex-start; }
+      .results-actions { flex-wrap: wrap; }
+      .page-tab { padding: 12px 14px; font-size: 12px; }
+      .navbar-title { font-size: 14px; }
+      .hero h1 { font-size: 22px; }
+    }
+
+    /* ─── Print Support ──────────────────────────── */
+    @media print {
+      .navbar-custom, .tab-bar, footer, .loading-overlay,
+      .toast-container-custom, .results-actions, .filter-bar { display: none !important; }
+      .card-custom { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+      body { background: white !important; }
+    }
   </style>
 </head>
 <body>
@@ -1051,6 +1222,12 @@
     <a class="nav-icon-btn" href="https://github.com/youknowzo" target="_blank" title="GitHub @youknowzo">
       <i class="fab fa-github"></i>
     </a>
+    <button class="nav-icon-btn" id="btn-dark-mode" title="Toggle Dark Mode">
+      <i class="fa fa-moon" id="dark-mode-icon"></i>
+    </button>
+    <button class="nav-icon-btn" id="btn-about" title="About Want2Know" style="font-size:12px;gap:4px;width:auto;padding:0 10px">
+      <i class="fa fa-circle-info"></i><span style="font-size:11px;font-weight:600">About</span>
+    </button>
     <button class="nav-icon-btn" id="btn-disclaimer" title="Legal Disclaimer" style="font-size:12px;gap:4px;width:auto;padding:0 10px">
       <i class="fa fa-shield-halved"></i><span style="font-size:11px;font-weight:600">Legal</span>
     </button>
@@ -1125,6 +1302,15 @@
 <!-- Main -->
 <div class="main-wrapper" id="search-wrapper">
 
+  <!-- Last Result Restore Banner -->
+  <div class="restore-banner" id="restore-banner" style="display:none">
+    <div><i class="fa fa-clock-rotate-left me-2"></i><span id="restore-banner-text">You have a recent search result saved.</span></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="btn-restore-result">Restore Last Search</button>
+      <button class="dismiss-btn" id="btn-dismiss-restore" title="Dismiss">×</button>
+    </div>
+  </div>
+
   <!-- Hero Search -->
   <div class="hero">
     <h1>Find Profiles <span>Everywhere</span></h1>
@@ -1145,6 +1331,12 @@
       <span class="options-divider">|</span>
       <button class="btn-ghost" id="clear-options">Clear</button>
       <button class="btn-ghost" id="reset-everything">Reset</button>
+    </div>
+
+    <!-- Slow scan warning -->
+    <div class="slow-scan-note" id="slow-scan-note">
+      <i class="fa fa-triangle-exclamation me-1"></i>
+      <strong>Heads up:</strong> Slow scan uses a browser engine (Selenium) which may not be available in all hosting environments. Fast Mode is recommended for reliable results.
     </div>
 
     <!-- Search history -->
@@ -1187,6 +1379,18 @@
           <span class="card-count" id="count-normal">0</span>
         </div>
         <i class="fa fa-chevron-down card-toggle-icon"></i>
+      </div>
+      <div class="filter-bar" id="profile-filter-bar" style="display:none">
+        <button class="filter-btn active" data-pfilter="all">All</button>
+        <button class="filter-btn" data-pfilter="found">Confirmed</button>
+        <button class="filter-btn" data-pfilter="possible">Possible</button>
+        <button class="filter-btn" data-pfilter="unknown">Unconfirmed</button>
+        <select class="sort-select" id="sort-profiles">
+          <option value="default">Default Order</option>
+          <option value="rate-desc">Confidence: High → Low</option>
+          <option value="rate-asc">Confidence: Low → High</option>
+          <option value="az">Platform A → Z</option>
+        </select>
       </div>
       <div class="card-body-custom" id="output-table-3"></div>
     </div>
@@ -1384,6 +1588,68 @@
 
 </div><!-- /main-wrapper -->
 
+<!-- About Modal -->
+<div class="modal fade modal-custom" id="about-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-circle-info me-2" style="color:var(--accent)"></i>About Want2Know</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+          <div style="background:var(--bg-hover);border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace">1000+</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Platforms Searched</div>
+          </div>
+          <div style="background:var(--bg-hover);border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:28px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace">3</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px">OSINT Tools</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <section>
+            <h6 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--accent);margin-bottom:8px"><i class="fa fa-bolt me-1"></i> What it does</h6>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Want2Know by PaperBagExpress is an OSINT (Open Source Intelligence) tool that searches for a username across 1000+ social media platforms, forums, gaming networks, and more. It only checks publicly accessible URLs — no login, no scraping, no hacking.</p>
+          </section>
+
+          <section>
+            <h6 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--accent);margin-bottom:10px"><i class="fa fa-list-check me-1"></i> Features</h6>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="about-features">
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>Profile search across 1000+ platforms</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>Fast scan with confidence scoring</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>Phone number intelligence</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>IP &amp; domain geolocation</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>WHOIS domain lookup</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>CSV &amp; JSON export</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>Dark mode toggle</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>Search history</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>Rate limiting protection</div>
+              <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle" style="color:var(--green);font-size:11px;flex-shrink:0"></i>Result persistence</div>
+            </div>
+          </section>
+
+          <section>
+            <h6 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--yellow);margin-bottom:8px"><i class="fa fa-triangle-exclamation me-1"></i> Understanding Results</h6>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">The confidence score (0–100%) reflects how likely a profile belongs to the searched username — <strong>it is not a guarantee</strong>. Common usernames may match many unrelated accounts. Always verify manually before drawing conclusions.</p>
+          </section>
+
+          <section>
+            <h6 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:8px"><i class="fa fa-code me-1"></i> Built With</h6>
+            <p style="font-size:12px;color:var(--text-muted)">Node.js · Express · Python · Bootstrap 5 · social-analyzer engine · phonenumbers · ip-api.com · RDAP</p>
+          </section>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:space-between">
+        <a href="https://github.com/youknowzo" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none"><i class="fab fa-github me-1"></i>github.com/youknowzo</a>
+        <button class="btn-primary-custom" data-bs-dismiss="modal">Got it</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Disclaimer Modal -->
 <div class="modal fade modal-custom" id="disclaimer-modal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -1450,7 +1716,7 @@
 
   <div class="hero" style="margin-bottom:32px">
     <h1>OSINT <span>Tools</span></h1>
-    <p>Phone number intelligence and IP geolocation — powered by OPRecon.</p>
+    <p>Phone number intelligence, IP geolocation, and WHOIS domain lookup — powered by OPRecon.</p>
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px">
@@ -1492,6 +1758,26 @@
           </button>
         </div>
         <div id="ip-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- WHOIS Lookup -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon card-icon-purple"><i class="fa fa-server"></i></div>
+          <div class="card-title">WHOIS / RDAP Lookup</div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:14px">Enter a domain name or IP address to retrieve registration and ownership data (e.g. example.com)</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input class="input-custom" id="whois-input" type="text" placeholder="example.com or 8.8.8.8" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-whois-lookup" style="white-space:nowrap">
+            <i class="fa fa-search"></i> Lookup
+          </button>
+        </div>
+        <div id="whois-result" style="display:none"></div>
       </div>
     </div>
 
@@ -1668,6 +1954,7 @@
   let interval_logs;
   let output_json = {};
   let global_uuid = '';
+  let profileData = [];
   let current_settings = [];
 
   function setLoading(on, text = 'Analyzing...', showCancel = false) {
@@ -1835,21 +2122,25 @@
 
       // ── Normal / Fast profiles
       if (data.user_info_normal.data.length > 0) {
-        let html = '';
+        profileData = [];
         data.user_info_normal.data.forEach(site => {
-          if (site.method === 'all') {
-            html += buildProfileItem(site, site.good === 'true' ? '' : 'unknown');
-          } else if (site.method === 'find') {
-            if (site.good === 'true') html += buildProfileItem(site);
-          } else if (site.method === 'get') {
-            html += buildProfileItem(site, 'unknown');
-          } else if (site.method === 'failed') {
-            html += buildProfileItem(site, 'failed');
+          let cls = '';
+          let skip = false;
+          if (site.method === 'all') { cls = site.good === 'true' ? '' : 'unknown'; }
+          else if (site.method === 'find') { if (site.good !== 'true') skip = true; }
+          else if (site.method === 'get') { cls = 'unknown'; }
+          else if (site.method === 'failed') { cls = 'failed'; }
+          if (!skip) {
+            const rateNum = parseFloat(site.rate) || 0;
+            profileData.push({ rate: rateNum, platform: site.title || site.link || '', _html: buildProfileItem(site, cls) });
           }
         });
-        document.getElementById('output-table-3').innerHTML = html;
+        renderProfiles();
+        document.getElementById('profile-filter-bar').style.display = profileData.length > 0 ? 'flex' : 'none';
         document.getElementById('count-normal').textContent = normalFound;
         document.getElementById('output-section-3').style.display = 'block';
+        saveLastResult(query, profileData);
+        checkRestoreBanner();
         showToast(`Found ${normalFound} profile${normalFound !== 1 ? 's' : ''}`, 'success');
       }
 
@@ -2257,6 +2548,173 @@
   document.getElementById('ip-input').addEventListener('keypress', e => {
     if (e.key === 'Enter') document.getElementById('btn-ip-lookup').click();
   });
+
+  // ── WHOIS / RDAP Lookup ───────────────────────────────────────────
+  document.getElementById('btn-whois-lookup').addEventListener('click', async () => {
+    const target = document.getElementById('whois-input').value.trim();
+    if (!target) { showToast('Please enter a domain or IP address', 'error'); return; }
+    const resultEl = document.getElementById('whois-result');
+    showReconLoading(resultEl);
+
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/whois', data: { target } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+
+      const rows = [
+        ['Target', data.target || target],
+        ['Type', data.type],
+        ['Domain', data.domain],
+        ['Registrar', data.registrar],
+        ['Status', data.status],
+        ['Created', data.created],
+        ['Expires', data.expires],
+        ['Updated', data.updated],
+        ['Name Servers', Array.isArray(data.name_servers) ? data.name_servers.join(', ') : data.name_servers],
+        ['Network', data.network],
+        ['Country', data.country],
+        ['CIDR', data.cidr],
+        ['Description', data.description],
+        ['RDAP Source', data.rdap_url]
+      ].filter(r => r[1] && r[1] !== 'undefined' && r[1] !== 'None' && r[1].trim !== '' && r[1] !== '');
+
+      const copyText = rows.map(r => `${r[0]}: ${r[1]}`).join('\n');
+      resultEl.innerHTML = `
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+          <button onclick="navigator.clipboard.writeText(${JSON.stringify(copyText)}).then(()=>showToast('Copied!','success'))" style="background:var(--bg-hover);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text-secondary);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px"><i class='fa fa-copy'></i> Copy</button>
+        </div>
+        <div style="padding:4px 0">
+          ${rows.map(r => reconRow(r[0], r[1])).join('')}
+        </div>`;
+      resultEl.style.display = 'block';
+      showToast('WHOIS lookup complete', 'success');
+    } catch(e) {
+      showReconError(resultEl, 'Request failed. Please try again.');
+    }
+  });
+
+  document.getElementById('whois-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('btn-whois-lookup').click();
+  });
+
+  // ── Dark Mode ─────────────────────────────────────────────────────
+  const darkKey = 'w2k_dark_mode';
+  const darkIcon = document.getElementById('dark-mode-icon');
+
+  function applyDark(on) {
+    document.body.classList.toggle('dark-mode', on);
+    if (darkIcon) {
+      darkIcon.className = on ? 'fa fa-sun' : 'fa fa-moon';
+    }
+    try { localStorage.setItem(darkKey, on ? '1' : '0'); } catch(e) {}
+  }
+
+  try {
+    if (localStorage.getItem(darkKey) === '1') applyDark(true);
+  } catch(e) {}
+
+  document.getElementById('btn-dark-mode').addEventListener('click', () => {
+    applyDark(!document.body.classList.contains('dark-mode'));
+  });
+
+  // ── About Modal ───────────────────────────────────────────────────
+  document.getElementById('btn-about').addEventListener('click', () => {
+    new bootstrap.Modal(document.getElementById('about-modal')).show();
+  });
+
+  // ── Result Persistence ────────────────────────────────────────────
+  const PERSIST_KEY = 'w2k_last_result';
+
+  function saveLastResult(username, items) {
+    try {
+      localStorage.setItem(PERSIST_KEY, JSON.stringify({ username, items, ts: Date.now() }));
+    } catch(e) {}
+  }
+
+  function checkRestoreBanner() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PERSIST_KEY) || 'null');
+      if (!saved) return;
+      const age = (Date.now() - saved.ts) / 60000;
+      if (age > 1440) { localStorage.removeItem(PERSIST_KEY); return; }
+      const mins = Math.floor(age);
+      const timeStr = mins < 2 ? 'just now' : mins < 60 ? `${mins} min ago` : `${Math.floor(mins/60)}h ago`;
+      document.getElementById('restore-banner-text').textContent = `Last search: "${saved.username}" — ${saved.items.length} profiles found (${timeStr})`;
+      document.getElementById('restore-banner').style.display = 'flex';
+    } catch(e) {}
+  }
+
+  checkRestoreBanner();
+
+  document.getElementById('btn-dismiss-restore').addEventListener('click', () => {
+    document.getElementById('restore-banner').style.display = 'none';
+  });
+
+  document.getElementById('btn-restore-result').addEventListener('click', () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PERSIST_KEY) || 'null');
+      if (!saved) return;
+      document.getElementById('restore-banner').style.display = 'none';
+      document.getElementById('string-to-analyze').value = saved.username;
+      showToast(`Restored: ${saved.items.length} profiles for "${saved.username}"`, 'success');
+      document.getElementById('analyze-normal').click();
+    } catch(e) {}
+  });
+
+  // ── Slow Scan Warning ─────────────────────────────────────────────
+  function updateSlowScanNote() {
+    const selEl = document.getElementById('analyzed-options');
+    if (!selEl) return;
+    const val = (selEl.value || '').toLowerCase();
+    const slow = val.includes('slow') || val.includes('selenium');
+    document.getElementById('slow-scan-note').style.display = slow ? 'flex' : 'none';
+  }
+
+  const fastBtn = document.getElementById('fast-options');
+  if (fastBtn) fastBtn.addEventListener('click', () => {
+    setTimeout(updateSlowScanNote, 200);
+  });
+
+  document.getElementById('clear-options') && document.getElementById('clear-options').addEventListener('click', () => {
+    document.getElementById('slow-scan-note').style.display = 'none';
+  });
+
+  // ── Filter & Sort Detected Profiles ──────────────────────────────
+
+  function renderProfiles() {
+    const filterBtns = document.querySelectorAll('[data-pfilter]');
+    const activeFilter = Array.from(filterBtns).find(b => b.classList.contains('active'));
+    const filter = activeFilter ? activeFilter.dataset.pfilter : 'all';
+    const sortVal = document.getElementById('sort-profiles').value;
+
+    let items = [...profileData];
+
+    if (filter === 'found')    items = items.filter(i => i.rate >= 80);
+    if (filter === 'possible') items = items.filter(i => i.rate >= 40 && i.rate < 80);
+    if (filter === 'unknown')  items = items.filter(i => i.rate < 40);
+
+    if (sortVal === 'rate-desc') items.sort((a, b) => (b.rate || 0) - (a.rate || 0));
+    if (sortVal === 'rate-asc')  items.sort((a, b) => (a.rate || 0) - (b.rate || 0));
+    if (sortVal === 'az')        items.sort((a, b) => (a.platform || '').localeCompare(b.platform || ''));
+
+    const container = document.getElementById('output-table-3');
+    if (items.length === 0) {
+      container.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px">No profiles match this filter</div>`;
+      return;
+    }
+    container.innerHTML = items.map(item => item._html || '').join('');
+  }
+
+  document.querySelectorAll('[data-pfilter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-pfilter]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProfiles();
+    });
+  });
+
+  document.getElementById('sort-profiles').addEventListener('change', renderProfiles);
+
+
 </script>
 
 </body>
