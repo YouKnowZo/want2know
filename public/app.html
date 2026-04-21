@@ -1015,6 +1015,59 @@
     }
 
     /* ─── OSINT Result Cards ─────────────────────── */
+    .badge-new {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #10B981, #06B6D4);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      font-family: 'Inter', sans-serif;
+    }
+    .risk-pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: 'Inter', sans-serif;
+    }
+    .risk-low { background: #DCFCE7; color: #166534; }
+    .risk-medium { background: #FEF3C7; color: #92400E; }
+    .risk-high { background: #FEE2E2; color: #991B1B; }
+    body.dark-mode .risk-low { background: rgba(34,197,94,0.18); color: #4ADE80; }
+    body.dark-mode .risk-medium { background: rgba(245,158,11,0.18); color: #FBBF24; }
+    body.dark-mode .risk-high { background: rgba(239,68,68,0.18); color: #F87171; }
+    .grade-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      font-size: 22px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+    }
+    .grade-A { background:#DCFCE7; color:#166534; }
+    .grade-B { background:#D1FAE5; color:#065F46; }
+    .grade-C { background:#FEF3C7; color:#92400E; }
+    .grade-D { background:#FED7AA; color:#9A3412; }
+    .grade-F { background:#FEE2E2; color:#991B1B; }
+    .sec-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; font-size:12px; margin-bottom:4px; }
+    .sec-row.present { background: rgba(16,185,129,0.08); }
+    .sec-row.missing { background: rgba(239,68,68,0.06); color: var(--text-muted); }
+    .sec-row i { width:14px; text-align:center; }
+    .dns-table { width:100%; font-size:12px; font-family:'Inter',sans-serif; border-collapse:collapse; margin-bottom:14px; }
+    .dns-table th { text-align:left; padding:6px 8px; background:var(--bg-hover); color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+    .dns-table td { padding:7px 8px; border-bottom:1px solid var(--border); word-break:break-all; }
+    .dns-type { display:inline-block; font-weight:700; color:var(--accent2); min-width:50px; }
+    .subdomain-chip { display:inline-block; padding:5px 10px; margin:3px; background:var(--bg-hover); border:1px solid var(--border); border-radius:6px; font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text-secondary); }
     .recon-result-row {
       display: flex;
       align-items: flex-start;
@@ -1409,6 +1462,15 @@
   <div class="loader-ring"></div>
   <div class="loading-status" id="loading-status">Starting analysis...</div>
   <div class="loading-counter" id="loading-counter"></div>
+  <div id="scan-progress-wrap" style="display:none;width:min(420px,80vw);margin-top:14px">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:6px;font-family:'Inter',sans-serif">
+      <span id="scan-progress-text">0 / 0 sites checked</span>
+      <span id="scan-progress-pct" style="font-weight:600;color:var(--accent2)">0%</span>
+    </div>
+    <div style="height:6px;background:var(--bg-hover);border-radius:6px;overflow:hidden">
+      <div id="scan-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent2),var(--green));transition:width 0.4s ease;border-radius:6px"></div>
+    </div>
+  </div>
   <button class="btn-cancel-loading" id="btn-cancel-loading" aria-label="Cancel analysis task">
     <i class="fa fa-times"></i> Cancel Task
   </button>
@@ -1922,24 +1984,46 @@
 <!-- OSINT Tools Panel -->
 <div id="osint-wrapper" class="main-wrapper" style="display:none">
 
-  <div class="hero" style="margin-bottom:32px">
+  <div class="hero" style="margin-bottom:24px">
     <h1>OSINT <span>Tools</span></h1>
-    <p>Phone number intelligence, IP geolocation, and WHOIS domain lookup — powered by OPRecon.</p>
+    <p>Eight pro-grade investigation tools — phone, email, IP, WHOIS, DNS, subdomains, security headers and username variations. All powered by Want2Know.</p>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px">
+  <!-- OSINT Stats Strip -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:26px;font-weight:700;color:var(--accent2);font-family:'Inter',sans-serif">8</div>
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px">Tools Available</div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:26px;font-weight:700;color:var(--green);font-family:'Inter',sans-serif">100%</div>
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px">Free, No API Key</div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:26px;font-weight:700;color:var(--purple);font-family:'Inter',sans-serif">300+</div>
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px">Area Codes Mapped</div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:26px;font-weight:700;color:var(--accent1);font-family:'Inter',sans-serif">&lt; 5s</div>
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px">Avg. Lookup Time</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px">
 
     <!-- Phone Lookup -->
     <div class="card-custom">
       <div class="card-header-custom" style="cursor:default">
         <div class="card-header-left">
           <div class="card-icon card-icon-green"><i class="fa fa-phone"></i></div>
-          <div class="card-title">Phone Number Lookup</div>
+          <div>
+            <div class="card-title">Phone Number Intel</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Carrier, line type, city, state, risk score, timezone, all formats</div>
+          </div>
         </div>
       </div>
       <div class="card-body-custom">
-        <p style="color:var(--text-muted);font-size:12px;margin-bottom:14px">Enter a phone number in international format (e.g. +1 212 555 0100)</p>
-        <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
           <input class="input-custom" id="phone-input" type="text" placeholder="+1 212 555 0100" style="flex:1" />
           <button class="btn-primary-custom" id="btn-phone-lookup" style="white-space:nowrap">
             <i class="fa fa-search"></i> Lookup
@@ -1949,17 +2033,41 @@
       </div>
     </div>
 
+    <!-- Email Lookup -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#FFE5EC;color:#E91E63"><i class="fa fa-envelope"></i></div>
+          <div>
+            <div class="card-title">Email Intel <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Validation, MX, SPF/DMARC, Gravatar, breach check, dorks</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="email-input" type="text" placeholder="someone@example.com" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-email-lookup" style="white-space:nowrap">
+            <i class="fa fa-search"></i> Lookup
+          </button>
+        </div>
+        <div id="email-result" style="display:none"></div>
+      </div>
+    </div>
+
     <!-- IP / Domain Lookup -->
     <div class="card-custom">
       <div class="card-header-custom" style="cursor:default">
         <div class="card-header-left">
           <div class="card-icon card-icon-blue"><i class="fa fa-earth-americas"></i></div>
-          <div class="card-title">IP / Domain Geolocation</div>
+          <div>
+            <div class="card-title">IP / Domain Geolocation</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Country, region, ISP, ASN, coordinates with map link</div>
+          </div>
         </div>
       </div>
       <div class="card-body-custom">
-        <p style="color:var(--text-muted);font-size:12px;margin-bottom:14px">Enter an IP address or domain name (e.g. 8.8.8.8 or google.com)</p>
-        <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
           <input class="input-custom" id="ip-input" type="text" placeholder="8.8.8.8 or google.com" style="flex:1" />
           <button class="btn-primary-custom" id="btn-ip-lookup" style="white-space:nowrap">
             <i class="fa fa-search"></i> Lookup
@@ -1974,18 +2082,108 @@
       <div class="card-header-custom" style="cursor:default">
         <div class="card-header-left">
           <div class="card-icon card-icon-purple"><i class="fa fa-server"></i></div>
-          <div class="card-title">WHOIS / RDAP Lookup</div>
+          <div>
+            <div class="card-title">WHOIS / RDAP</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Registrar, owner, dates, nameservers</div>
+          </div>
         </div>
       </div>
       <div class="card-body-custom">
-        <p style="color:var(--text-muted);font-size:12px;margin-bottom:14px">Enter a domain name or IP address to retrieve registration and ownership data (e.g. example.com)</p>
-        <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
           <input class="input-custom" id="whois-input" type="text" placeholder="example.com or 8.8.8.8" style="flex:1" />
           <button class="btn-primary-custom" id="btn-whois-lookup" style="white-space:nowrap">
             <i class="fa fa-search"></i> Lookup
           </button>
         </div>
         <div id="whois-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- DNS Lookup -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#E5F4FF;color:#0EA5E9"><i class="fa fa-sitemap"></i></div>
+          <div>
+            <div class="card-title">DNS Records <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">A, AAAA, MX, NS, TXT, CNAME, SOA, CAA, DMARC</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="dns-input" type="text" placeholder="example.com" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-dns-lookup" style="white-space:nowrap">
+            <i class="fa fa-search"></i> Lookup
+          </button>
+        </div>
+        <div id="dns-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Subdomain Finder -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#FFF4E5;color:#F59E0B"><i class="fa fa-network-wired"></i></div>
+          <div>
+            <div class="card-title">Subdomain Finder <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Discovers subdomains via Certificate Transparency logs</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="subdomain-input" type="text" placeholder="example.com" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-subdomain-lookup" style="white-space:nowrap">
+            <i class="fa fa-search"></i> Find
+          </button>
+        </div>
+        <div id="subdomain-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- HTTP Headers / Security -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#E8F8E8;color:#16A34A"><i class="fa fa-lock"></i></div>
+          <div>
+            <div class="card-title">Security Headers <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Grade a website's security posture (HSTS, CSP, XFO, more)</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="headers-input" type="text" placeholder="https://example.com" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-headers-lookup" style="white-space:nowrap">
+            <i class="fa fa-search"></i> Scan
+          </button>
+        </div>
+        <div id="headers-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Username Generator -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#F0E5FF;color:#7C3AED"><i class="fa fa-shuffle"></i></div>
+          <div>
+            <div class="card-title">Username Variations <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Generate 30+ likely variations of a username for deeper search</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="usergen-input" type="text" placeholder="john doe or johndoe" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-usergen" style="white-space:nowrap">
+            <i class="fa fa-bolt"></i> Generate
+          </button>
+        </div>
+        <div id="usergen-result" style="display:none"></div>
       </div>
     </div>
 
@@ -2173,6 +2371,13 @@
     if (on) {
       liveFoundCount = 0;
       document.getElementById('loading-counter').textContent = '';
+      const pw = document.getElementById('scan-progress-wrap');
+      if (pw) {
+        pw.style.display = 'none';
+        document.getElementById('scan-progress-bar').style.width = '0%';
+        document.getElementById('scan-progress-pct').textContent = '0%';
+        document.getElementById('scan-progress-text').textContent = '0 / 0 sites checked';
+      }
       showSkeletons();
     } else {
       hideSkeletons();
@@ -2202,17 +2407,23 @@
       .done(data => {
         if (data && data !== 'Error' && data !== 'nothinghere' && data !== 'nothing_here_error') {
           document.getElementById('loading-status').textContent = data;
-          // Parse live found count from log messages
-          const m = String(data).match(/found[:\s]+(\d+)|(\d+)\s+found|\[(\d+)\]/i);
-          if (m) {
-            const n = parseInt(m[1] || m[2] || m[3]);
-            if (!isNaN(n) && n > liveFoundCount) {
-              liveFoundCount = n;
-              document.getElementById('loading-counter').textContent = `${liveFoundCount} profile${liveFoundCount !== 1 ? 's' : ''} found so far`;
-            }
-          }
         } else if (data === 'nothing_here_error' || data === 'Error') {
           clearInterval(interval_logs);
+        }
+      });
+    // Authoritative progress from server
+    $.ajax({ type: 'POST', url: '/scan_progress', data: { uuid } })
+      .done(p => {
+        if (p && p.total > 0) {
+          const pct = Math.min(100, Math.round((p.checked / p.total) * 100));
+          document.getElementById('scan-progress-wrap').style.display = 'block';
+          document.getElementById('scan-progress-text').textContent = `${p.checked.toLocaleString()} / ${p.total.toLocaleString()} sites checked`;
+          document.getElementById('scan-progress-pct').textContent = pct + '%';
+          document.getElementById('scan-progress-bar').style.width = pct + '%';
+          if (p.found > liveFoundCount) {
+            liveFoundCount = p.found;
+            document.getElementById('loading-counter').textContent = `${liveFoundCount} profile${liveFoundCount !== 1 ? 's' : ''} found so far`;
+          }
         }
       });
   }
@@ -2697,13 +2908,17 @@
       osint.style.display  = 'none';
       document.getElementById('tab-search').classList.add('active');
       document.getElementById('tab-osint').classList.remove('active');
+      try { history.replaceState(null,'','#search'); } catch(e){}
     } else {
       search.style.display = 'none';
       osint.style.display  = 'block';
       document.getElementById('tab-osint').classList.add('active');
       document.getElementById('tab-search').classList.remove('active');
+      try { history.replaceState(null,'','#osint'); } catch(e){}
     }
   }
+  window.switchTab = switchTab;
+  if (location.hash === '#osint') switchTab('osint');
 
   // ── OSINT Helpers ─────────────────────────────────────────────────
   function reconRow(key, val, cls = '') {
@@ -2721,7 +2936,11 @@
     el.innerHTML = `<div style="padding:14px;color:var(--red);font-size:13px"><i class="fa fa-triangle-exclamation"></i> ${msg}</div>`;
   }
 
-  // ── Phone Lookup ──────────────────────────────────────────────────
+  // ── Phone Lookup (enriched) ───────────────────────────────────────
+  function copyButton(text, label='Copy') {
+    return `<button onclick="navigator.clipboard.writeText(${JSON.stringify(text)}).then(()=>showToast('Copied!','success'))" style="background:var(--bg-hover);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text-secondary);font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:5px"><i class='fa fa-copy'></i> ${label}</button>`;
+  }
+
   document.getElementById('btn-phone-lookup').addEventListener('click', async () => {
     const number = document.getElementById('phone-input').value.trim();
     if (!number) { showToast('Please enter a phone number', 'error'); return; }
@@ -2733,22 +2952,45 @@
       if (data.error) { showReconError(resultEl, data.error); return; }
 
       const validClass = data.valid ? 'good' : 'bad';
+      const cityState = [data.area_city, data.area_state].filter(Boolean).join(', ');
+      const riskClass = 'risk-' + (data.risk_level || 'low');
+      const riskHtml = data.risk_level
+        ? `<span class="risk-pill ${riskClass}">${data.risk_level} risk</span>`
+        : '';
+
+      const heroBlock = `
+        <div style="background:linear-gradient(135deg,var(--bg-hover),var(--bg-card));border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <div>
+              <div style="font-size:18px;font-weight:700;color:var(--text-primary);font-family:'Inter',sans-serif">${data.international_format || number}</div>
+              ${cityState ? `<div style="font-size:13px;color:var(--text-secondary);margin-top:3px"><i class="fa fa-location-dot" style="color:var(--accent2);margin-right:4px"></i>${cityState}${data.country_name && !cityState.includes(data.country_name) ? ` · ${data.country_name}` : ''}</div>` : (data.country_name ? `<div style="font-size:13px;color:var(--text-secondary);margin-top:3px"><i class="fa fa-location-dot" style="color:var(--accent2);margin-right:4px"></i>${data.country_name}</div>` : '')}
+            </div>
+            <div style="text-align:right">
+              ${riskHtml}
+              ${data.area_code ? `<div style="font-size:10px;color:var(--text-muted);margin-top:6px;text-transform:uppercase;letter-spacing:0.5px">Area ${data.area_code}</div>` : ''}
+            </div>
+          </div>
+          ${data.risk_note ? `<div style="font-size:11px;color:var(--text-muted);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)"><i class="fa fa-circle-info" style="margin-right:4px"></i>${data.risk_note}</div>` : ''}
+        </div>`;
+
       const rows = [
         ['Valid', data.valid ? 'Yes' : 'No', validClass],
-        ['International', data.international_format],
-        ['National', data.national_format],
-        ['Country', data.country_name],
-        ['Country Code', data.country_code ? '+' + data.country_code : ''],
-        ['Location', data.location],
         ['Carrier', data.carrier],
         ['Line Type', data.line_type],
-        ...(data.timezones && data.timezones.length ? [['Timezones', data.timezones.join(', ')]] : [])
+        ['Country', `${data.country_name || ''}${data.country_code ? ' (+' + data.country_code + ')' : ''}`],
+        ['City', data.area_city],
+        ['State', data.area_state],
+        ['Region Code', data.region_code],
+        ['Timezones', (data.timezones || []).join(', ')],
+        ['National', data.national_format],
+        ['International', data.international_format],
+        ['E.164', data.e164_format],
+        ['RFC 3966', data.rfc3966_format]
       ];
       const copyText = rows.filter(r => r[1]).map(r => `${r[0]}: ${r[1]}`).join('\n');
       resultEl.innerHTML = `
-        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-          <button onclick="navigator.clipboard.writeText(${JSON.stringify(copyText)}).then(()=>showToast('Copied!','success'))" style="background:var(--bg-hover);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text-secondary);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px"><i class='fa fa-copy'></i> Copy</button>
-        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">${copyButton(copyText)}</div>
+        ${heroBlock}
         <div style="padding:4px 0">
           ${rows.map(r => reconRow(r[0], r[1], r[2] || '')).join('')}
         </div>`;
@@ -2855,6 +3097,229 @@
 
   document.getElementById('whois-input').addEventListener('keypress', e => {
     if (e.key === 'Enter') document.getElementById('btn-whois-lookup').click();
+  });
+
+  // ── Email Lookup ──────────────────────────────────────────────────
+  document.getElementById('btn-email-lookup').addEventListener('click', async () => {
+    const email = document.getElementById('email-input').value.trim();
+    if (!email) { showToast('Please enter an email', 'error'); return; }
+    const resultEl = document.getElementById('email-result');
+    showReconLoading(resultEl);
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/email', data: { email } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+
+      const flagPill = (label, ok, okText='Yes', noText='No') =>
+        `<span class="risk-pill ${ok ? 'risk-low' : 'risk-high'}">${label}: ${ok ? okText : noText}</span>`;
+
+      const flags = `
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+          ${flagPill('Valid format', data.valid_format)}
+          ${flagPill('MX records', data.has_mx, 'Found', 'Missing')}
+          ${flagPill('SPF', data.spf_present, 'Present', 'Missing')}
+          ${flagPill('DMARC', data.dmarc_present, 'Present', 'Missing')}
+          ${data.is_disposable ? `<span class="risk-pill risk-high">Disposable</span>` : ''}
+          ${data.is_free_provider ? `<span class="risk-pill risk-medium">Free provider</span>` : ''}
+        </div>`;
+
+      const mxList = (data.mx_records || []).slice(0,5).map(m => `<div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text-secondary);padding:3px 0">${m}</div>`).join('') || '<div style="color:var(--text-muted);font-size:11px">No MX records</div>';
+
+      const dorks = (data.google_dorks || []).map(d =>
+        `<a href="https://www.google.com/search?q=${encodeURIComponent(d)}" target="_blank" rel="noopener" class="subdomain-chip" style="text-decoration:none;cursor:pointer">${d.replace(/</g,'&lt;')}</a>`
+      ).join('');
+
+      resultEl.innerHTML = `
+        ${flags}
+        <div style="background:var(--bg-hover);border-radius:10px;padding:12px;margin-bottom:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Mail Servers (MX)</div>
+          ${mxList}
+        </div>
+        ${reconRow('Domain', data.domain)}
+        ${reconRow('Username', data.username)}
+        ${reconRow('Gravatar', `<a href="${data.gravatar_url}" target="_blank" rel="noopener" style="color:var(--accent2)">${data.gravatar_url}</a>`)}
+        ${reconRow('Breach Check', `<a href="${data.breach_check_url}" target="_blank" rel="noopener" style="color:var(--accent2)"><i class="fa fa-shield-halved"></i> Search HaveIBeenPwned</a>`)}
+        ${reconRow('MD5', `<code style="font-size:10px">${data.md5_hash}</code>`)}
+        ${reconRow('SHA-256', `<code style="font-size:10px;word-break:break-all">${data.sha256_hash}</code>`)}
+        <div style="margin-top:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Pivot: Google Dorks</div>
+          <div>${dorks}</div>
+        </div>`;
+      showToast('Email lookup complete', 'success');
+    } catch(e) {
+      showReconError(resultEl, 'Request failed. Please try again.');
+    }
+  });
+  document.getElementById('email-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('btn-email-lookup').click();
+  });
+
+  // ── DNS Lookup ────────────────────────────────────────────────────
+  document.getElementById('btn-dns-lookup').addEventListener('click', async () => {
+    const target = document.getElementById('dns-input').value.trim();
+    if (!target) { showToast('Please enter a domain', 'error'); return; }
+    const resultEl = document.getElementById('dns-result');
+    showReconLoading(resultEl);
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/dns', data: { target } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+
+      const summary = data.summary || {};
+      const summaryRow = `
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+          <span class="risk-pill ${summary.has_mx ? 'risk-low' : 'risk-high'}">MX: ${summary.has_mx ? 'Yes' : 'No'}</span>
+          <span class="risk-pill ${summary.has_spf ? 'risk-low' : 'risk-medium'}">SPF: ${summary.has_spf ? 'Yes' : 'No'}</span>
+          <span class="risk-pill ${summary.has_dmarc ? 'risk-low' : 'risk-medium'}">DMARC: ${summary.has_dmarc ? 'Yes' : 'No'}</span>
+          <span class="risk-pill risk-low">${summary.total_records || 0} records</span>
+        </div>`;
+
+      let body = '';
+      Object.entries(data.records || {}).forEach(([type, items]) => {
+        if (!items || items.length === 0) return;
+        body += `<table class="dns-table"><thead><tr><th style="width:60px">Type</th><th>Value</th><th style="width:60px;text-align:right">TTL</th></tr></thead><tbody>`;
+        items.forEach(it => {
+          body += `<tr><td><span class="dns-type">${type}</span></td><td>${(it.data||'').replace(/</g,'&lt;')}</td><td style="text-align:right;color:var(--text-muted)">${it.ttl||''}</td></tr>`;
+        });
+        body += `</tbody></table>`;
+      });
+      if (!body) body = '<div style="color:var(--text-muted);padding:14px;text-align:center">No DNS records found</div>';
+
+      resultEl.innerHTML = summaryRow + body;
+      showToast('DNS lookup complete', 'success');
+    } catch(e) {
+      showReconError(resultEl, 'Request failed. Please try again.');
+    }
+  });
+  document.getElementById('dns-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('btn-dns-lookup').click();
+  });
+
+  // ── Subdomain Finder ──────────────────────────────────────────────
+  document.getElementById('btn-subdomain-lookup').addEventListener('click', async () => {
+    const target = document.getElementById('subdomain-input').value.trim();
+    if (!target) { showToast('Please enter a domain', 'error'); return; }
+    const resultEl = document.getElementById('subdomain-result');
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)"><div class="loader-ring" style="margin:0 auto 10px"></div>Querying Certificate Transparency logs… (can take 10–15s)</div>';
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/subdomains', data: { target } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+      const subs = data.subdomains || [];
+      if (subs.length === 0) {
+        resultEl.innerHTML = '<div style="color:var(--text-muted);padding:14px;text-align:center">No subdomains found in Certificate Transparency logs.</div>';
+        return;
+      }
+      const chips = subs.map(s => `<a href="https://${s}" target="_blank" rel="noopener" class="subdomain-chip" style="text-decoration:none">${s}</a>`).join('');
+      const copyText = subs.join('\n');
+      resultEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div><span style="font-size:22px;font-weight:700;color:var(--accent2);font-family:'Inter',sans-serif">${data.count}</span> <span style="color:var(--text-muted);font-size:12px">subdomains found</span></div>
+          ${copyButton(copyText, 'Copy all')}
+        </div>
+        <div>${chips}</div>`;
+      showToast(`Found ${data.count} subdomains`, 'success');
+    } catch(e) {
+      showReconError(resultEl, 'Request failed. Please try again.');
+    }
+  });
+  document.getElementById('subdomain-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('btn-subdomain-lookup').click();
+  });
+
+  // ── Security Headers ──────────────────────────────────────────────
+  document.getElementById('btn-headers-lookup').addEventListener('click', async () => {
+    const target = document.getElementById('headers-input').value.trim();
+    if (!target) { showToast('Please enter a URL', 'error'); return; }
+    const resultEl = document.getElementById('headers-result');
+    showReconLoading(resultEl);
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/headers', data: { target } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+      const sec = data.security || {};
+      const grade = sec.grade || 'F';
+      const present = (sec.present || []).map(p =>
+        `<div class="sec-row present"><i class="fa fa-check" style="color:#10B981"></i><div style="flex:1"><strong style="font-family:'Inter',sans-serif">${p.header}</strong> — <span style="color:var(--text-muted);font-size:11px">${p.description}</span></div></div>`
+      ).join('');
+      const missing = (sec.missing || []).map(m =>
+        `<div class="sec-row missing"><i class="fa fa-xmark" style="color:#EF4444"></i><div style="flex:1"><strong style="font-family:'Inter',sans-serif">${m.header}</strong> — <span style="font-size:11px">${m.description}</span></div></div>`
+      ).join('');
+      const tech = (data.tech_hints || []).map(t => `<span class="subdomain-chip">${t}</span>`).join('') || '<span style="color:var(--text-muted);font-size:11px">No fingerprints detected</span>';
+
+      resultEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;background:var(--bg-hover);border-radius:12px;padding:14px">
+          <div class="grade-pill grade-${grade}">${grade}</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;font-family:'Inter',sans-serif">Security Score: ${sec.score || 0}/100</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${data.final_url || data.url} · HTTP ${data.status_code}</div>
+          </div>
+        </div>
+        ${present ? `<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin:10px 0 6px;font-weight:600">Present (${(sec.present||[]).length})</div>${present}` : ''}
+        ${missing ? `<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin:14px 0 6px;font-weight:600">Missing (${(sec.missing||[]).length})</div>${missing}` : ''}
+        <div style="margin-top:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Tech Fingerprints</div>
+          <div>${tech}</div>
+        </div>`;
+      showToast(`Security grade: ${grade}`, 'success');
+    } catch(e) {
+      showReconError(resultEl, 'Request failed. Please try again.');
+    }
+  });
+  document.getElementById('headers-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('btn-headers-lookup').click();
+  });
+
+  // ── Username Variations Generator (no API) ────────────────────────
+  function generateUsernameVariations(input) {
+    input = input.trim().toLowerCase();
+    const parts = input.split(/[\s._\-]+/).filter(Boolean);
+    const variants = new Set();
+    if (!input) return [];
+    variants.add(input.replace(/\s+/g,''));
+    if (parts.length >= 2) {
+      const [first, ...rest] = parts;
+      const last = rest.join('');
+      const flast = first[0] + last;
+      const firstl = first + last[0];
+      [
+        first + last, last + first, flast, firstl,
+        first + '.' + last, first + '_' + last, first + '-' + last,
+        last + '.' + first, last + '_' + first,
+        first + last + '1', first + last + '123', first + last + '_',
+        '_' + first + last, first + last + '.', 'the' + first + last,
+        first + last + 'official', 'real' + first + last
+      ].forEach(v => variants.add(v));
+    } else {
+      const base = parts[0] || input;
+      [base, base+'1', base+'123', base+'_', '_'+base, base+'.', 'the'+base,
+       base+'official', 'real'+base, base+'hq', 'mr'+base, base+'xx',
+       base+'2024', base+'2025', base+'2026'].forEach(v => variants.add(v));
+    }
+    // l33t-speak variations
+    const leetMap = {a:'4', e:'3', i:'1', o:'0', s:'5', t:'7'};
+    const leeted = input.replace(/\s+/g,'').replace(/[aeiost]/g, c => leetMap[c]||c);
+    if (leeted !== input.replace(/\s+/g,'')) variants.add(leeted);
+    return Array.from(variants).filter(v => v.length >= 2 && v.length <= 30);
+  }
+
+  document.getElementById('btn-usergen').addEventListener('click', () => {
+    const input = document.getElementById('usergen-input').value;
+    if (!input.trim()) { showToast('Please enter a name or username', 'error'); return; }
+    const variations = generateUsernameVariations(input);
+    const resultEl = document.getElementById('usergen-result');
+    resultEl.style.display = 'block';
+    const chips = variations.map(v =>
+      `<span class="subdomain-chip" style="cursor:pointer" onclick="document.getElementById('analyzed-string').value='${v}';switchTab('search');showToast('Set as search target','success')">${v}</span>`
+    ).join('');
+    const copyText = variations.join('\n');
+    resultEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div><span style="font-size:22px;font-weight:700;color:var(--accent2);font-family:'Inter',sans-serif">${variations.length}</span> <span style="color:var(--text-muted);font-size:12px">variations · click to use</span></div>
+        ${copyButton(copyText, 'Copy all')}
+      </div>
+      <div>${chips}</div>`;
+    showToast(`${variations.length} variations generated`, 'success');
+  });
+  document.getElementById('usergen-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('btn-usergen').click();
   });
 
   // ── Dark Mode ─────────────────────────────────────────────────────

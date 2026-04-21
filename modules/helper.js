@@ -228,7 +228,7 @@ async function get_url_wrapper_json (url, time = 2) {
   }
 }
 
-async function get_url_wrapper_text (url, time = 2) {
+async function get_url_wrapper_text (url, time = 1.5) {
   const response_body = 'error-get-url'
   const ret = 500
   try {

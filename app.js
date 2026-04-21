@@ -111,8 +111,17 @@ app.use(express.static('public'))
 
 // ── In-memory rate limiter ────────────────────────────────────────────────────
 const _rl = {}
-const RL_MAX = 15
+const RL_MAX = 60
 const RL_WIN = 60000
+
+// ── In-memory scan progress tracker ───────────────────────────────────────────
+const _progress = {}
+function setProgress(uuid, checked, total, found) {
+  _progress[uuid] = { checked, total, found, ts: Date.now() }
+}
+function getProgress(uuid) { return _progress[uuid] || null }
+setInterval(() => { const cutoff = Date.now() - 600000; Object.keys(_progress).forEach(k => { if (_progress[k].ts < cutoff) delete _progress[k] }) }, 120000)
+global.__w2k_setProgress = setProgress
 function isRateLimited(ip) {
   const now = Date.now()
   if (!_rl[ip] || now > _rl[ip].reset) { _rl[ip] = { count: 1, reset: now + RL_WIN }; return false }
@@ -124,6 +133,10 @@ setInterval(() => { const now = Date.now(); Object.keys(_rl).forEach(ip => { if 
 
 app.get('/', (req, res) => {
   res.redirect('/app.html')
+})
+
+app.post('/scan_progress', async function (req, res, next) {
+  res.json(getProgress(req.body.uuid) || { checked: 0, total: 0, found: 0 })
 })
 
 app.post('/get_logs', async function (req, res, next) {
@@ -603,6 +616,38 @@ app.post('/api/whois', async function (req, res, next) {
   const target = (req.body.target || '').trim()
   if (!target) return res.json({ error: 'No target provided' })
   const result = await run_python('./recon/whois_lookup.py', [target])
+  res.json(result)
+})
+
+app.post('/api/email', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const email = (req.body.email || '').trim()
+  if (!email) return res.json({ error: 'No email provided' })
+  const result = await run_python('./recon/email_lookup.py', [email])
+  res.json(result)
+})
+
+app.post('/api/dns', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const target = (req.body.target || '').trim()
+  if (!target) return res.json({ error: 'No domain provided' })
+  const result = await run_python('./recon/dns_lookup.py', [target])
+  res.json(result)
+})
+
+app.post('/api/subdomains', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const target = (req.body.target || '').trim()
+  if (!target) return res.json({ error: 'No domain provided' })
+  const result = await run_python('./recon/subdomain_lookup.py', [target])
+  res.json(result)
+})
+
+app.post('/api/headers', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const target = (req.body.target || '').trim()
+  if (!target) return res.json({ error: 'No URL provided' })
+  const result = await run_python('./recon/headers_lookup.py', [target])
   res.json(result)
 })
 

@@ -7,20 +7,28 @@ import cheerio from 'cheerio'
 import engine from './engine.js'
 
 async function find_username_normal (req) {
-  helper.log_to_file_queue(req.body.uuid, '[init] Selected websites: ' + helper.websites_entries.filter((item) => item.selected === 'true').length + ' for username: ' + req.body.string)
+  const total_selected = helper.websites_entries.filter((item) => item.selected === 'true').length
+  helper.log_to_file_queue(req.body.uuid, '[init] Selected websites: ' + total_selected + ' for username: ' + req.body.string)
   const time = new Date()
   let all_results = []
-  const [first_re_try, first_profiles] = await find_username_normal_wrapper(req, helper.websites_entries)
-  helper.verbose && console.log(`Total time ${new Date() - time}`)
-  const [second_re_try, second_profiles] = await find_username_normal_wrapper(req, first_re_try)
-  helper.verbose && console.log(`Total time ${new Date() - time}`)
-  const [third_re_try, third_profiles] = await find_username_normal_wrapper(req, second_re_try)
-  helper.verbose && console.log(`Total time ${new Date() - time}`)
-  if (third_re_try.length > 0) {
-    const failed_sites = await get_failed(req, third_re_try)
-    all_results = Array.prototype.concat(first_profiles, second_profiles, third_profiles, failed_sites)
+  // Reset progress
+  if (global.__w2k_setProgress) global.__w2k_setProgress(req.body.uuid, 0, total_selected, 0)
+  // Single round + one quick retry only (was 3 rounds — caused massive slowdowns)
+  const [first_re_try, first_profiles] = await find_username_normal_wrapper(req, helper.websites_entries, 0, total_selected)
+  helper.verbose && console.log(`Round 1 done in ${new Date() - time}ms, retrying ${first_re_try.length} sites`)
+  const [second_re_try, second_profiles] = await find_username_normal_wrapper(req, first_re_try, first_profiles.length, total_selected)
+  helper.verbose && console.log(`Round 2 done in ${new Date() - time}ms, ${second_re_try.length} still failing`)
+
+  if (second_re_try.length > 0) {
+    const failed_sites = await get_failed(req, second_re_try)
+    all_results = Array.prototype.concat(first_profiles, second_profiles, failed_sites)
   } else {
-    all_results = Array.prototype.concat(first_profiles, second_profiles, third_profiles)
+    all_results = Array.prototype.concat(first_profiles, second_profiles)
+  }
+
+  if (global.__w2k_setProgress) {
+    const found = all_results.filter(p => p && p.good === 'true').length
+    global.__w2k_setProgress(req.body.uuid, total_selected, total_selected, found)
   }
 
   all_results = all_results.filter(item => item)
@@ -48,25 +56,31 @@ async function get_failed (req, failed) {
   return temp_result
 }
 
-async function find_username_normal_wrapper (req, sites) {
+async function find_username_normal_wrapper (req, sites, baseChecked = 0, totalAll = 0) {
   const results = []
   const re_try = []
   const functions = []
+  let checked = baseChecked
   try {
     const temp_sites = sites.filter(site => site.selected === 'true')
     if (temp_sites.length > 0) {
       await temp_sites.forEach(site => {
         if (site.detections.length > 0 && !helper.global_lock.includes(req.body.uuid)) {
-          functions.push(find_username_site.bind(null, req.body.uuid, req.body.string, req.body.option, site))
+          functions.push(async (cb) => {
+            const result = await find_username_site(req.body.uuid, req.body.string, req.body.option, site)
+            checked++
+            const foundSoFar = results.filter(r => r && r.good === 'true').length + (result && result.profile && result.profile.good === 'true' ? 1 : 0)
+            if (global.__w2k_setProgress && totalAll > 0) global.__w2k_setProgress(req.body.uuid, checked, totalAll, foundSoFar)
+            cb(null, result)
+          })
         }
       })
-      const temp_results = await async.parallelLimit(functions, 15)
+      const temp_results = await async.parallelLimit(functions, 25)
       await temp_results.forEach(item => {
         if (item !== undefined) {
           if (item.return === 1) {
             results.push(item.profile)
           } else {
-            helper.log_to_file_queue(req.body.uuid, '[Waiting to retry] ' + helper.get_site_from_url(item.site.url))
             re_try.push(item.site)
           }
         }

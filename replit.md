@@ -52,9 +52,25 @@ Want2Know is an OSINT (Open Source Intelligence) tool by PaperBagExpress that se
 - Cancel task button in loading overlay
 - **OPRecon OSINT Tools tab** with Phone Number Lookup and IP/Domain Geolocation
 
-## OPRecon Integration
-- `recon/phone_lookup.py` — parses and validates phone numbers via the `phonenumbers` Python library; returns country, carrier, line type, timezones
-- `recon/ip_lookup.py` — queries `ip-api.com` (free, no API key); returns ISP, org, ASN, lat/lon, timezone, city
-- `/api/phone` (POST, param: `number`) — spawns the phone lookup script
-- `/api/ip` (POST, param: `target`) — spawns the IP lookup script; accepts IPs and domains
-- Frontend tab: "OSINT Tools" tab in nav bar switches between Profile Search and the two OSINT lookup panels; Enter key and Google Maps link supported
+## OSINT Tools (8 total, all free, no API keys)
+- `recon/phone_lookup.py` — phone intel: validity, carrier, line type, US area code → city/state, risk score, all formats (E.164/RFC3966/INTL/NATL), timezones. Backed by `phonenumbers` + local `recon/data/area_codes.json` (300+ NANP codes)
+- `recon/ip_lookup.py` — IP/domain geolocation via ip-api.com
+- `recon/whois_lookup.py` — WHOIS / RDAP domain & IP registration
+- `recon/email_lookup.py` — email validation, MX/SPF/DMARC via Cloudflare DoH, Gravatar URL, MD5/SHA hashes, HIBP breach link, Google dork pivots
+- `recon/dns_lookup.py` — A/AAAA/MX/NS/TXT/CNAME/SOA/CAA/DMARC records via Cloudflare DoH
+- `recon/subdomain_lookup.py` — subdomain enumeration via crt.sh Certificate Transparency logs
+- `recon/headers_lookup.py` — security header grading (HSTS/CSP/XFO/etc.) → A–F score, plus tech stack fingerprints
+- Username variations generator (pure JS in-browser, 30+ variants incl. l33t-speak; chips clickable to feed back into Profile Search)
+
+## API Endpoints (all POST)
+- `/api/phone` { number } · `/api/ip` { target } · `/api/whois` { target }
+- `/api/email` { email } · `/api/dns` { target } · `/api/subdomains` { target } · `/api/headers` { target }
+- `/scan_progress` { uuid } → `{checked, total, found}` for live progress bar
+
+## Performance / Anti-Freeze Fixes (Apr 2026)
+- Rate limit raised 15 → 60/min (was blocking back-to-back scans)
+- Fast-scan retry rounds reduced 3 → 1 (huge speedup; was main "freeze" cause)
+- Concurrent request limit raised 15 → 25
+- HTTP timeout lowered 2s → 1.5s
+- New in-memory `_progress` tracker exposes accurate `X / Y sites checked` to the UI
+- Loading overlay now shows authoritative progress bar + percent + live found count
