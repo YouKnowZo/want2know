@@ -651,6 +651,48 @@ app.post('/api/headers', async function (req, res, next) {
   res.json(result)
 })
 
+app.post('/api/wayback', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const target = (req.body.target || '').trim()
+  if (!target) return res.json({ error: 'No URL provided' })
+  res.json(await run_python('./recon/wayback_lookup.py', [target]))
+})
+
+app.post('/api/breach', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const email = (req.body.email || '').trim()
+  if (!email) return res.json({ error: 'No email provided' })
+  res.json(await run_python('./recon/breach_lookup.py', [email]))
+})
+
+app.post('/api/threat', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const target = (req.body.target || '').trim()
+  if (!target) return res.json({ error: 'No target provided' })
+  res.json(await run_python('./recon/threat_lookup.py', [target]))
+})
+
+app.post('/api/github_profile', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const username = (req.body.username || '').trim()
+  if (!username) return res.json({ error: 'No username provided' })
+  res.json(await run_python('./recon/github_profile.py', [username]))
+})
+
+app.post('/api/reddit_profile', async function (req, res, next) {
+  if (isRateLimited(req.ip || req.socket.remoteAddress)) return res.json({ error: 'Rate limit exceeded. Please wait 1 minute.' })
+  const username = (req.body.username || '').trim()
+  if (!username) return res.json({ error: 'No username provided' })
+  res.json(await run_python('./recon/reddit_profile.py', [username]))
+})
+
+// ── Search counter (file-backed) ─────────────────────────────────────────────
+const COUNTER_FILE = './data/search_count.txt'
+function readCount() { try { return parseInt(fs.readFileSync(COUNTER_FILE, 'utf8')) || 0 } catch (e) { return 0 } }
+function bumpCount() { try { fs.writeFileSync(COUNTER_FILE, String(readCount() + 1)) } catch (e) {} }
+app.get('/api/stats', (req, res) => res.json({ searches: readCount() }))
+app.post('/api/stats/bump', (req, res) => { bumpCount(); res.json({ searches: readCount() }) })
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 app.use((err, req, res, next) => {

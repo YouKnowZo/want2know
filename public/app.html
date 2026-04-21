@@ -35,6 +35,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- Selectize -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
 
   <style>
     :root {
@@ -949,7 +950,31 @@
       .hero h1 { font-size: 26px; }
       .search-bar { flex-direction: column; gap: 10px; }
       .btn-analyze { width: 100%; justify-content: center; }
-      .main-wrapper { padding: 20px 16px 60px; }
+      .main-wrapper { padding: 20px 12px 60px; }
+      /* OSINT cards: single column, comfortable padding */
+      #osint-wrapper > div[style*="grid-template-columns"]:not([id]) { grid-template-columns: 1fr !important; gap: 14px !important; }
+      #osint-wrapper .card-custom { border-radius: 12px; }
+      #osint-wrapper .card-body-custom { padding: 14px 14px 16px; }
+      #osint-wrapper .card-body-custom > div[style*="display:flex"] { flex-wrap: wrap; }
+      #osint-wrapper input.input-custom { width: 100% !important; min-width: 0; }
+      #osint-wrapper .btn-primary-custom { width: 100%; justify-content: center; }
+      .recon-result-row { flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 0; }
+      .recon-key { font-size: 10px; min-width: auto; }
+      .recon-val { font-size: 12px; word-break: break-word; }
+      .subdomain-chip { font-size: 11px; padding: 4px 8px; }
+      /* Stats strip → 2 columns on phone */
+      #osint-wrapper > div[style*="grid-template-columns:repeat(auto-fit,minmax(160px"] { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+      /* Tabs */
+      .page-tabs { flex-wrap: wrap; }
+      /* Modal full-bleed */
+      .modal-dialog { margin: 8px; }
+      /* Leaflet height */
+      .leaflet-container { height: 180px !important; }
+    }
+    @media (max-width: 420px) {
+      .hero h1 { font-size: 22px; }
+      .hero p { font-size: 13px; }
+      #osint-wrapper > div[style*="grid-template-columns:repeat(auto-fit,minmax(160px"] { grid-template-columns: 1fr 1fr !important; }
     }
 
     /* ─── Toast ──────────────────────────────────── */
@@ -1985,14 +2010,14 @@
 <div id="osint-wrapper" class="main-wrapper" style="display:none">
 
   <div class="hero" style="margin-bottom:24px">
-    <h1>OSINT <span>Tools</span></h1>
-    <p>Eight pro-grade investigation tools — phone, email, IP, WHOIS, DNS, subdomains, security headers and username variations. All powered by Want2Know.</p>
+    <h1>OSINT <span>Toolkit</span></h1>
+    <p>Fourteen pro-grade investigation tools — phone, email, IP, WHOIS, DNS, subdomains, headers, breach data, Wayback, threat intel, GitHub &amp; Reddit deep-scans, reverse image, bulk mode, saved cases &amp; PDF reports.</p>
   </div>
 
   <!-- OSINT Stats Strip -->
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px">
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
-      <div style="font-size:26px;font-weight:700;color:var(--accent2);font-family:'Inter',sans-serif">8</div>
+      <div style="font-size:26px;font-weight:700;color:var(--accent2);font-family:'Inter',sans-serif">14</div>
       <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px">Tools Available</div>
     </div>
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
@@ -2000,8 +2025,8 @@
       <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px">Free, No API Key</div>
     </div>
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
-      <div style="font-size:26px;font-weight:700;color:var(--purple);font-family:'Inter',sans-serif">300+</div>
-      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px">Area Codes Mapped</div>
+      <div style="font-size:26px;font-weight:700;color:var(--purple);font-family:'Inter',sans-serif" id="live-search-count">0</div>
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px">Searches Run</div>
     </div>
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
       <div style="font-size:26px;font-weight:700;color:var(--accent1);font-family:'Inter',sans-serif">&lt; 5s</div>
@@ -2187,6 +2212,197 @@
       </div>
     </div>
 
+    <!-- Breach Analytics (XposedOrNot) -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#FEE2E2;color:#DC2626"><i class="fa fa-database"></i></div>
+          <div>
+            <div class="card-title">Breach Analytics <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Real breach data — names, dates, exposed fields, risk score</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="breach-input" type="email" placeholder="user@example.com" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-breach-lookup" style="white-space:nowrap">
+            <i class="fa fa-magnifying-glass"></i> Check
+          </button>
+        </div>
+        <div id="breach-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Wayback Machine -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#EEF2FF;color:#4F46E5"><i class="fa fa-clock-rotate-left"></i></div>
+          <div>
+            <div class="card-title">Wayback Snapshots <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Historical archives of any URL — see deleted/changed content</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="wayback-input" type="text" placeholder="example.com or full URL" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-wayback-lookup" style="white-space:nowrap">
+            <i class="fa fa-history"></i> Fetch
+          </button>
+        </div>
+        <div id="wayback-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Threat Intel -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#FEF3C7;color:#D97706"><i class="fa fa-shield-virus"></i></div>
+          <div>
+            <div class="card-title">Threat Intelligence <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Check domains/IPs against URLhaus &amp; ThreatFox malware databases</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="threat-input" type="text" placeholder="domain.com or IP" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-threat-lookup" style="white-space:nowrap">
+            <i class="fa fa-radar"></i> Scan
+          </button>
+        </div>
+        <div id="threat-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- GitHub Profile -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#1F2937;color:#fff"><i class="fa-brands fa-github"></i></div>
+          <div>
+            <div class="card-title">GitHub Profile <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Deep scan: bio, repos, stars, languages, joined date</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="ghprof-input" type="text" placeholder="github username (e.g. torvalds)" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-ghprof-lookup" style="white-space:nowrap">
+            <i class="fa fa-user-secret"></i> Scan
+          </button>
+        </div>
+        <div id="ghprof-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Reddit Profile -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#FFEBE5;color:#FF4500"><i class="fa-brands fa-reddit-alien"></i></div>
+          <div>
+            <div class="card-title">Reddit Profile <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Karma, account age, recent subreddits &amp; comment activity</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="rdprof-input" type="text" placeholder="reddit username (without u/)" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-rdprof-lookup" style="white-space:nowrap">
+            <i class="fa fa-user-secret"></i> Scan
+          </button>
+        </div>
+        <div id="rdprof-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Reverse Image Search -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#FFE5F1;color:#DB2777"><i class="fa fa-image"></i></div>
+          <div>
+            <div class="card-title">Reverse Image Search <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Find an image's source across Google Lens, Yandex, TinEye, Bing</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="input-custom" id="revimg-input" type="text" placeholder="https://example.com/photo.jpg" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-revimg" style="white-space:nowrap">
+            <i class="fa fa-magnifying-glass"></i> Search
+          </button>
+        </div>
+        <div id="revimg-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Bulk Lookup -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#E0F2FE;color:#0284C7"><i class="fa fa-layer-group"></i></div>
+          <div>
+            <div class="card-title">Bulk Lookup <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Paste up to 50 emails, phones, IPs, or domains for a combined report</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <textarea id="bulk-input" class="input-custom" rows="4" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:12px;margin-bottom:10px" placeholder="One per line — emails, phone numbers, IPs, or domains"></textarea>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="btn-primary-custom" id="btn-bulk-run" style="white-space:nowrap">
+            <i class="fa fa-play"></i> Run Bulk
+          </button>
+          <button class="btn-primary-custom" id="btn-bulk-csv" style="white-space:nowrap;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border)">
+            <i class="fa fa-file-csv"></i> Upload CSV
+          </button>
+          <input type="file" id="bulk-csv-file" accept=".csv,.txt" style="display:none" />
+          <button class="btn-primary-custom" id="btn-bulk-pdf" style="white-space:nowrap;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border)" disabled>
+            <i class="fa fa-file-pdf"></i> Export PDF
+          </button>
+        </div>
+        <div id="bulk-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Saved Cases -->
+    <div class="card-custom">
+      <div class="card-header-custom" style="cursor:default">
+        <div class="card-header-left">
+          <div class="card-icon" style="background:#ECFDF5;color:#059669"><i class="fa fa-folder-open"></i></div>
+          <div>
+            <div class="card-title">Saved Cases <span class="badge-new">NEW</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Group lookups under a named investigation (stored in your browser)</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body-custom">
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input class="input-custom" id="case-name" type="text" placeholder="Case name (e.g. acme-investigation)" style="flex:1" />
+          <button class="btn-primary-custom" id="btn-case-new" style="white-space:nowrap">
+            <i class="fa fa-plus"></i> New
+          </button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="btn-primary-custom" id="btn-case-export" style="white-space:nowrap;background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border);font-size:12px">
+            <i class="fa fa-download"></i> Export JSON
+          </button>
+          <button class="btn-primary-custom" id="btn-case-clear" style="white-space:nowrap;background:var(--bg-hover);color:var(--red);border:1px solid var(--border);font-size:12px">
+            <i class="fa fa-trash"></i> Clear All
+          </button>
+        </div>
+        <div id="case-list"></div>
+      </div>
+    </div>
+
   </div>
 
 </div><!-- /osint-wrapper -->
@@ -2211,6 +2427,8 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
   // ── Helpers ──────────────────────────────────────────────────────
@@ -2994,7 +3212,7 @@
         <div style="padding:4px 0">
           ${rows.map(r => reconRow(r[0], r[1], r[2] || '')).join('')}
         </div>`;
-      showToast('Phone lookup complete', 'success');
+      showToast('Phone lookup complete', 'success'); saveToCase('phone', number, data); bumpStat();
     } catch(e) {
       showReconError(resultEl, 'Request failed. Please try again.');
     }
@@ -3016,8 +3234,9 @@
       if (data.error) { showReconError(resultEl, data.error); return; }
       if (data.status === 'fail') { showReconError(resultEl, 'Lookup failed for this target'); return; }
 
-      const mapsLink = data.lat && data.lon
-        ? `<a href="https://maps.google.com/?q=${data.lat},${data.lon}" target="_blank" style="color:var(--accent2)">View on Google Maps ↗</a>`
+      const hasGeo = (typeof data.lat === 'number' && typeof data.lon === 'number' && (data.lat || data.lon));
+      const mapsLink = hasGeo
+        ? `<a href="https://maps.google.com/?q=${data.lat},${data.lon}" target="_blank" style="color:var(--accent2)">Open in Google Maps ↗</a>`
         : '';
 
       const ipRows = [
@@ -3034,14 +3253,26 @@
         ['AS', data.as_info]
       ];
       const ipCopyText = ipRows.filter(r => r[1] && r[1] !== 'undefined').map(r => `${r[0]}: ${r[1]}`).join('\n');
+      const mapId = `ipmap-${Date.now()}`;
       resultEl.innerHTML = `
         <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
           <button onclick="navigator.clipboard.writeText(${JSON.stringify(ipCopyText)}).then(()=>showToast('Copied!','success'))" style="background:var(--bg-hover);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text-secondary);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px"><i class='fa fa-copy'></i> Copy</button>
         </div>
+        ${hasGeo ? `<div id="${mapId}" style="height:220px;border-radius:12px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);z-index:1"></div>` : ''}
         <div style="padding:4px 0">
           ${ipRows.map(r => reconRow(r[0], r[1])).join('')}
           ${mapsLink ? `<div class="recon-result-row"><div class="recon-key">Map</div><div class="recon-val">${mapsLink}</div></div>` : ''}
         </div>`;
+      if (hasGeo && window.L) {
+        setTimeout(() => {
+          try {
+            const m = L.map(mapId, { scrollWheelZoom: false, zoomControl: true }).setView([data.lat, data.lon], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(m);
+            L.marker([data.lat, data.lon]).addTo(m).bindPopup(`<strong>${data.ip}</strong><br>${data.city||''}${data.country?', '+data.country:''}`).openPopup();
+          } catch(e) { console.error('Leaflet init failed', e); }
+        }, 50);
+      }
+      saveToCase('ip', target, data); bumpStat();
       showToast('IP lookup complete', 'success');
     } catch(e) {
       showReconError(resultEl, 'Request failed. Please try again.');
@@ -3089,7 +3320,7 @@
           ${rows.map(r => reconRow(r[0], r[1])).join('')}
         </div>`;
       resultEl.style.display = 'block';
-      showToast('WHOIS lookup complete', 'success');
+      showToast('WHOIS lookup complete', 'success'); saveToCase('whois', target, data); bumpStat();
     } catch(e) {
       showReconError(resultEl, 'Request failed. Please try again.');
     }
@@ -3144,7 +3375,7 @@
           <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Pivot: Google Dorks</div>
           <div>${dorks}</div>
         </div>`;
-      showToast('Email lookup complete', 'success');
+      showToast('Email lookup complete', 'success'); saveToCase('email', email, data); bumpStat();
     } catch(e) {
       showReconError(resultEl, 'Request failed. Please try again.');
     }
@@ -3184,7 +3415,7 @@
       if (!body) body = '<div style="color:var(--text-muted);padding:14px;text-align:center">No DNS records found</div>';
 
       resultEl.innerHTML = summaryRow + body;
-      showToast('DNS lookup complete', 'success');
+      showToast('DNS lookup complete', 'success'); saveToCase('dns', target, data); bumpStat();
     } catch(e) {
       showReconError(resultEl, 'Request failed. Please try again.');
     }
@@ -3216,7 +3447,7 @@
           ${copyButton(copyText, 'Copy all')}
         </div>
         <div>${chips}</div>`;
-      showToast(`Found ${data.count} subdomains`, 'success');
+      showToast(`Found ${data.count} subdomains`, 'success'); saveToCase('subdomains', target, data); bumpStat();
     } catch(e) {
       showReconError(resultEl, 'Request failed. Please try again.');
     }
@@ -3258,7 +3489,7 @@
           <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Tech Fingerprints</div>
           <div>${tech}</div>
         </div>`;
-      showToast(`Security grade: ${grade}`, 'success');
+      showToast(`Security grade: ${grade}`, 'success'); saveToCase('headers', target, data); bumpStat();
     } catch(e) {
       showReconError(resultEl, 'Request failed. Please try again.');
     }
@@ -3321,6 +3552,394 @@
   document.getElementById('usergen-input').addEventListener('keypress', e => {
     if (e.key === 'Enter') document.getElementById('btn-usergen').click();
   });
+
+  // ── Breach Analytics ──────────────────────────────────────────────
+  document.getElementById('btn-breach-lookup').addEventListener('click', async () => {
+    const email = document.getElementById('breach-input').value.trim();
+    if (!email) { showToast('Please enter an email', 'error'); return; }
+    const resultEl = document.getElementById('breach-result');
+    showReconLoading(resultEl);
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/breach', data: { email } });
+      if (data.error && !data.breached) { showReconError(resultEl, data.error); return; }
+      if (!data.breached || data.breach_count === 0) {
+        resultEl.innerHTML = `<div style="text-align:center;padding:24px"><div style="font-size:42px;color:#10B981;margin-bottom:8px"><i class="fa fa-shield-check"></i></div><div style="font-size:16px;font-weight:700;font-family:'Inter',sans-serif">No breaches found</div><div style="color:var(--text-muted);font-size:12px;margin-top:4px">${email} hasn't appeared in any tracked breach.</div></div>`;
+        resultEl.style.display = 'block'; saveToCase('breach', email, data); return;
+      }
+      const riskMap = {high:'#DC2626',medium:'#F59E0B',low:'#10B981'};
+      const riskCol = riskMap[(data.risk_label||'').toLowerCase()] || '#6B7280';
+      const breachCards = (data.breaches||[]).map(b => `
+        <div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;background:var(--bg-card)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px">
+            <div style="font-weight:700;font-family:'Inter',sans-serif">${b.name}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${b.date} · ${(b.records||0).toLocaleString()} records</div>
+          </div>
+          ${b.summary ? `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">${b.summary}</div>` : ''}
+          <div style="display:flex;gap:4px;flex-wrap:wrap">${(b.exposed_data||[]).map(x=>`<span class="subdomain-chip" style="background:#FEF3C7;color:#92400E;font-size:10px">${x}</span>`).join('')}</div>
+        </div>`).join('');
+      resultEl.innerHTML = `
+        <div style="background:linear-gradient(135deg,${riskCol}22,var(--bg-card));border:1px solid ${riskCol}44;border-radius:12px;padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <div><div style="font-size:24px;font-weight:700;color:${riskCol};font-family:'Inter',sans-serif">${data.breach_count} breaches</div><div style="font-size:12px;color:var(--text-secondary)">${email}</div></div>
+            ${data.risk_label ? `<div style="text-align:right"><div style="background:${riskCol};color:#fff;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase">${data.risk_label} Risk</div>${data.risk_score ? `<div style="font-size:10px;color:var(--text-muted);margin-top:4px">Score: ${data.risk_score}</div>` : ''}</div>` : ''}
+          </div>
+        </div>
+        ${data.exposed_data && data.exposed_data.length ? `<div style="margin-bottom:12px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600">All exposed data types</div><div>${data.exposed_data.map(x=>`<span class="subdomain-chip">${x}</span>`).join('')}</div></div>` : ''}
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin:10px 0 6px;font-weight:600">Breaches</div>
+        ${breachCards}`;
+      resultEl.style.display = 'block';
+      saveToCase('breach', email, data);
+      bumpStat();
+    } catch(e) { showReconError(resultEl, 'Request failed. Please try again.'); }
+  });
+  document.getElementById('breach-input').addEventListener('keypress', e => { if (e.key==='Enter') document.getElementById('btn-breach-lookup').click(); });
+
+  // ── Wayback Snapshots ─────────────────────────────────────────────
+  document.getElementById('btn-wayback-lookup').addEventListener('click', async () => {
+    const target = document.getElementById('wayback-input').value.trim();
+    if (!target) { showToast('Enter a URL', 'error'); return; }
+    const resultEl = document.getElementById('wayback-result');
+    showReconLoading(resultEl);
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/wayback', data: { target } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+      const snaps = (data.snapshots || []).slice().reverse();
+      const list = snaps.slice(0, 30).map(s => `<a href="${s.url}" target="_blank" rel="noopener" class="subdomain-chip" style="text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:11px">${s.date}</a>`).join('');
+      resultEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div><span style="font-size:24px;font-weight:700;color:var(--accent2);font-family:'Inter',sans-serif">${data.count}</span> <span style="color:var(--text-muted);font-size:12px">snapshots</span></div>
+          <div style="font-size:11px;color:var(--text-muted);font-family:'Inter',sans-serif">${data.first} → ${data.last}</div>
+        </div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Most recent (newest first)</div>
+        <div>${list}</div>`;
+      resultEl.style.display = 'block';
+      saveToCase('wayback', target, data); bumpStat();
+    } catch(e) { showReconError(resultEl, 'Request failed.'); }
+  });
+  document.getElementById('wayback-input').addEventListener('keypress', e => { if (e.key==='Enter') document.getElementById('btn-wayback-lookup').click(); });
+
+  // ── Threat Intel ──────────────────────────────────────────────────
+  document.getElementById('btn-threat-lookup').addEventListener('click', async () => {
+    const target = document.getElementById('threat-input').value.trim();
+    if (!target) { showToast('Enter a domain or IP', 'error'); return; }
+    const resultEl = document.getElementById('threat-result');
+    showReconLoading(resultEl);
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/threat', data: { target } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+      const isMal = data.is_malicious;
+      const col = isMal ? '#DC2626' : '#10B981';
+      const verdictHtml = `<div style="background:linear-gradient(135deg,${col}22,var(--bg-card));border:1px solid ${col}44;border-radius:12px;padding:14px;margin-bottom:12px;text-align:center"><div style="font-size:32px;color:${col};margin-bottom:6px"><i class="fa fa-${isMal?'triangle-exclamation':'shield-check'}"></i></div><div style="font-size:18px;font-weight:700;color:${col};font-family:'Inter',sans-serif;text-transform:uppercase">${data.verdict}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.target}${data.sources.length?' · '+data.sources.join(', '):''}</div></div>`;
+      const entries = (data.urlhaus.entries || []).map(e => `
+        <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;background:var(--bg-card)">
+          <div style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text-primary);word-break:break-all;margin-bottom:4px">${e.url}</div>
+          <div style="font-size:11px;color:var(--text-muted)"><strong>${e.threat||'unknown'}</strong> · ${e.date_added} · status: ${e.status}</div>
+          ${e.tags && e.tags.length ? `<div style="margin-top:4px">${e.tags.map(t=>`<span class="subdomain-chip" style="background:#FEE2E2;color:#991B1B;font-size:10px">${t}</span>`).join('')}</div>` : ''}
+        </div>`).join('');
+      resultEl.innerHTML = verdictHtml + (entries ? `<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin:10px 0 6px;font-weight:600">Reported indicators</div>${entries}` : '');
+      resultEl.style.display = 'block';
+      saveToCase('threat', target, data); bumpStat();
+    } catch(e) { showReconError(resultEl, 'Request failed.'); }
+  });
+  document.getElementById('threat-input').addEventListener('keypress', e => { if (e.key==='Enter') document.getElementById('btn-threat-lookup').click(); });
+
+  // ── GitHub Profile ────────────────────────────────────────────────
+  document.getElementById('btn-ghprof-lookup').addEventListener('click', async () => {
+    const username = document.getElementById('ghprof-input').value.trim();
+    if (!username) { showToast('Enter a GitHub username', 'error'); return; }
+    const resultEl = document.getElementById('ghprof-result');
+    showReconLoading(resultEl);
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/github_profile', data: { username } });
+      if (data.error) { showReconError(resultEl, data.error); return; }
+      const repos = (data.top_repos||[]).map(r => `
+        <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;background:var(--bg-card)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:6px">
+            <a href="${r.url}" target="_blank" rel="noopener" style="font-weight:700;font-family:'Inter',sans-serif;color:var(--accent2);text-decoration:none">${r.name}</a>
+            <div style="font-size:11px;color:var(--text-muted)"><i class="fa fa-star"></i> ${r.stars} · <i class="fa fa-code-fork"></i> ${r.forks}${r.language?' · '+r.language:''}</div>
+          </div>
+          ${r.description ? `<div style="font-size:12px;color:var(--text-secondary)">${r.description}</div>` : ''}
+        </div>`).join('');
+      const langs = (data.languages||[]).map(([l,c]) => `<span class="subdomain-chip">${l} (${c})</span>`).join('');
+      resultEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;background:var(--bg-hover);border-radius:12px;padding:14px;flex-wrap:wrap">
+          <img src="${data.avatar}" style="width:64px;height:64px;border-radius:50%;border:2px solid var(--border)" />
+          <div style="flex:1;min-width:180px">
+            <div style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif">${data.name || data.username}</div>
+            <div style="font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">@${data.username} · joined ${data.created_at}</div>
+            ${data.bio ? `<div style="font-size:13px;color:var(--text-secondary);margin-top:6px">${data.bio}</div>` : ''}
+          </div>
+          <a href="${data.html_url}" target="_blank" rel="noopener" class="subdomain-chip" style="text-decoration:none"><i class="fa-brands fa-github"></i> View</a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:14px">
+          ${[['Repos',data.public_repos],['Followers',data.followers],['Following',data.following],['Gists',data.public_gists]].map(([k,v])=>`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;color:var(--accent2)">${v.toLocaleString()}</div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">${k}</div></div>`).join('')}
+        </div>
+        ${reconRow('Company', data.company)}
+        ${reconRow('Location', data.location)}
+        ${reconRow('Email', data.email)}
+        ${reconRow('Blog', data.blog ? `<a href="${data.blog.startsWith('http')?data.blog:'https://'+data.blog}" target="_blank" rel="noopener" style="color:var(--accent2)">${data.blog}</a>` : '')}
+        ${reconRow('Twitter/X', data.twitter ? `<a href="https://x.com/${data.twitter}" target="_blank" rel="noopener" style="color:var(--accent2)">@${data.twitter}</a>` : '')}
+        ${langs ? `<div style="margin-top:14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Top Languages</div><div>${langs}</div></div>` : ''}
+        ${repos ? `<div style="margin-top:14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Recent Repos</div>${repos}</div>` : ''}`;
+      resultEl.style.display = 'block';
+      saveToCase('github', username, data); bumpStat();
+    } catch(e) { showReconError(resultEl, 'Request failed.'); }
+  });
+  document.getElementById('ghprof-input').addEventListener('keypress', e => { if (e.key==='Enter') document.getElementById('btn-ghprof-lookup').click(); });
+
+  // ── Reddit Profile ────────────────────────────────────────────────
+  document.getElementById('btn-rdprof-lookup').addEventListener('click', async () => {
+    const username = document.getElementById('rdprof-input').value.trim();
+    if (!username) { showToast('Enter a Reddit username', 'error'); return; }
+    const resultEl = document.getElementById('rdprof-result');
+    showReconLoading(resultEl);
+    try {
+      const data = await $.ajax({ type: 'POST', url: '/api/reddit_profile', data: { username } });
+      if (data.error) {
+        // Reddit blocks server traffic frequently — graceful fallback
+        resultEl.innerHTML = `<div style="padding:14px;background:var(--bg-hover);border-radius:10px"><div style="color:var(--red);font-size:13px;margin-bottom:8px"><i class="fa fa-triangle-exclamation"></i> ${data.error}</div><a href="${data.url || 'https://www.reddit.com/user/'+username}" target="_blank" rel="noopener" class="subdomain-chip" style="text-decoration:none"><i class="fa-brands fa-reddit-alien"></i> Open profile manually</a></div>`;
+        resultEl.style.display = 'block'; return;
+      }
+      const subs = (data.recent_subs||[]).map(([s,c]) => `<a href="https://www.reddit.com/r/${s}" target="_blank" rel="noopener" class="subdomain-chip" style="text-decoration:none">r/${s} (${c})</a>`).join('');
+      const comments = (data.recent_comments||[]).map(c => `
+        <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;background:var(--bg-card)">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px"><a href="https://www.reddit.com/r/${c.subreddit}" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none">r/${c.subreddit}</a><span><i class="fa fa-arrow-up"></i> ${c.score}</span></div>
+          <div style="font-size:12px;color:var(--text-secondary)">${c.body.replace(/</g,'&lt;')}</div>
+        </div>`).join('');
+      resultEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;background:var(--bg-hover);border-radius:12px;padding:14px;flex-wrap:wrap">
+          ${data.icon_img ? `<img src="${data.icon_img}" style="width:64px;height:64px;border-radius:50%;border:2px solid var(--border)" />` : `<div style="width:64px;height:64px;border-radius:50%;background:#FF4500;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px"><i class="fa-brands fa-reddit-alien"></i></div>`}
+          <div style="flex:1;min-width:180px">
+            <div style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif">u/${data.username}</div>
+            <div style="font-size:12px;color:var(--text-muted)">joined ${data.created_date} · ${data.account_age_days.toLocaleString()} days old</div>
+            ${data.subreddit_desc ? `<div style="font-size:13px;color:var(--text-secondary);margin-top:6px">${data.subreddit_desc}</div>` : ''}
+          </div>
+          <a href="${data.url}" target="_blank" rel="noopener" class="subdomain-chip" style="text-decoration:none"><i class="fa-brands fa-reddit-alien"></i> View</a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px">
+          ${[['Total Karma',data.total_karma],['Comment Karma',data.comment_karma],['Link Karma',data.link_karma],['Verified Email',data.verified_email?'Yes':'No']].map(([k,v])=>`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;color:#FF4500">${typeof v==='number'?v.toLocaleString():v}</div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">${k}</div></div>`).join('')}
+        </div>
+        ${subs ? `<div style="margin-bottom:14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Active Subreddits</div><div>${subs}</div></div>` : ''}
+        ${comments ? `<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600">Recent Comments</div>${comments}</div>` : ''}`;
+      resultEl.style.display = 'block';
+      saveToCase('reddit', username, data); bumpStat();
+    } catch(e) { showReconError(resultEl, 'Request failed.'); }
+  });
+  document.getElementById('rdprof-input').addEventListener('keypress', e => { if (e.key==='Enter') document.getElementById('btn-rdprof-lookup').click(); });
+
+  // ── Reverse Image Search (link generators — no upload needed) ─────
+  document.getElementById('btn-revimg').addEventListener('click', () => {
+    const url = document.getElementById('revimg-input').value.trim();
+    if (!url) { showToast('Paste an image URL', 'error'); return; }
+    const enc = encodeURIComponent(url);
+    const engines = [
+      ['Google Lens', `https://lens.google.com/uploadbyurl?url=${enc}`, '#4285F4', 'fa-google'],
+      ['Yandex',       `https://yandex.com/images/search?rpt=imageview&url=${enc}`, '#FF0000', 'fa-y-combinator'],
+      ['TinEye',       `https://tineye.com/search/?url=${enc}`, '#1A535C', 'fa-eye'],
+      ['Bing Visual',  `https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:${enc}`, '#008373', 'fa-microsoft'],
+      ['Karma Decay (Reddit)', `https://karmadecay.com/?url=${enc}`, '#FF4500', 'fa-reddit-alien'],
+      ['SauceNAO',     `https://saucenao.com/search.php?url=${enc}`, '#7C3AED', 'fa-image']
+    ];
+    const resultEl = document.getElementById('revimg-result');
+    resultEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;background:var(--bg-hover);border-radius:10px;padding:10px">
+        <img src="${url}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid var(--border)" onerror="this.style.display='none'" />
+        <div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;word-break:break-all">${url}</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px">
+        ${engines.map(([n,u,c]) => `<a href="${u}" target="_blank" rel="noopener" style="background:var(--bg-card);border:1px solid var(--border);border-left:3px solid ${c};border-radius:8px;padding:10px 12px;text-decoration:none;color:var(--text-primary);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between"><span>${n}</span><i class="fa fa-arrow-up-right-from-square" style="font-size:10px;color:var(--text-muted)"></i></a>`).join('')}
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text-muted);text-align:center">Each engine opens in a new tab with the image pre-loaded.</div>`;
+    resultEl.style.display = 'block';
+    saveToCase('reverse-image', url, { engines: engines.map(e=>e[0]) });
+  });
+  document.getElementById('revimg-input').addEventListener('keypress', e => { if (e.key==='Enter') document.getElementById('btn-revimg').click(); });
+
+  // ── Bulk Lookup ───────────────────────────────────────────────────
+  let bulkResults = [];
+  function detectKind(s) {
+    s = s.trim();
+    if (!s) return null;
+    if (/^[\w.+-]+@[\w-]+\.[\w.-]+$/.test(s)) return 'email';
+    if (/^\+?[\d\s().-]{7,}$/.test(s)) return 'phone';
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(s) || /^[a-fA-F0-9:]+$/.test(s) && s.includes(':')) return 'ip';
+    if (/^[\w-]+(\.[\w-]+)+$/.test(s)) return 'domain';
+    return 'username';
+  }
+  async function runBulkItem(item) {
+    const kind = detectKind(item);
+    if (!kind) return { input: item, kind: 'unknown', error: 'Unrecognized format' };
+    try {
+      let url, body, summary = '';
+      if (kind === 'email') { url='/api/breach'; body={email:item}; }
+      else if (kind === 'phone') { url='/api/phone'; body={number:item}; }
+      else if (kind === 'ip' || kind === 'domain') { url='/api/ip'; body={target:item}; }
+      else { url='/api/whois'; body={target:item}; }
+      const r = await $.ajax({ type:'POST', url, data: body });
+      if (kind==='email') summary = r.breached ? `${r.breach_count} breaches (${r.risk_label||'risk unknown'})` : 'Clean';
+      else if (kind==='phone') summary = r.error ? r.error : `${r.country_name||'?'} · ${r.carrier||r.line_type||''}`;
+      else if (kind==='ip'||kind==='domain') summary = r.error ? r.error : `${r.country||'?'} · ${r.city||''} · ${r.isp||r.org||''}`;
+      return { input: item, kind, summary, raw: r };
+    } catch(e) { return { input: item, kind, error: 'Request failed' }; }
+  }
+  document.getElementById('btn-bulk-run').addEventListener('click', async () => {
+    const lines = document.getElementById('bulk-input').value.split('\n').map(l=>l.trim()).filter(Boolean).slice(0, 50);
+    if (!lines.length) { showToast('Paste at least one line', 'error'); return; }
+    const resultEl = document.getElementById('bulk-result');
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = `<div style="text-align:center;padding:14px;color:var(--text-muted)"><div class="loader-ring" style="margin:0 auto 8px"></div>Processing ${lines.length} item${lines.length>1?'s':''}...</div>`;
+    bulkResults = [];
+    const concurrency = 5;
+    let idx = 0;
+    async function worker() {
+      while (idx < lines.length) {
+        const i = idx++;
+        const r = await runBulkItem(lines[i]);
+        bulkResults.push(r);
+        renderBulk(lines.length);
+      }
+    }
+    await Promise.all(Array.from({length:concurrency}, worker));
+    document.getElementById('btn-bulk-pdf').disabled = false;
+    showToast('Bulk scan complete', 'success'); bumpStat();
+    saveToCase('bulk', `${lines.length} items`, bulkResults);
+  });
+  function renderBulk(total) {
+    const resultEl = document.getElementById('bulk-result');
+    const kindCol = { email:'#DC2626', phone:'#0EA5E9', ip:'#7C3AED', domain:'#F59E0B', username:'#10B981', unknown:'#6B7280' };
+    const rows = bulkResults.map(r => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="background:${kindCol[r.kind]||'#888'};color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;text-transform:uppercase;font-weight:700;min-width:48px;text-align:center">${r.kind}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-primary);flex:0 0 auto;max-width:35%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.input}</span>
+        <span style="flex:1;color:${r.error?'var(--red)':'var(--text-secondary)'};font-size:12px">${r.error || r.summary}</span>
+      </div>`).join('');
+    resultEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-hover);border-radius:8px 8px 0 0;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">
+        <span>Bulk Results</span><span>${bulkResults.length} / ${total}</span>
+      </div>
+      <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">${rows}</div>`;
+  }
+  document.getElementById('btn-bulk-csv').addEventListener('click', () => document.getElementById('bulk-csv-file').click());
+  document.getElementById('bulk-csv-file').addEventListener('change', (ev) => {
+    const f = ev.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = e => {
+      const cells = e.target.result.split(/[\n,;]+/).map(c => c.trim()).filter(Boolean);
+      document.getElementById('bulk-input').value = cells.slice(0,50).join('\n');
+      showToast(`Loaded ${cells.length} items from CSV`, 'success');
+    };
+    r.readAsText(f);
+  });
+  document.getElementById('btn-bulk-pdf').addEventListener('click', () => exportPDF('Bulk Investigation Report', bulkResults));
+
+  // ── PDF Export (jsPDF) ────────────────────────────────────────────
+  function exportPDF(title, items) {
+    if (!window.jspdf) { showToast('PDF library not loaded', 'error'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'pt', format:'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    let y = 50;
+    doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(20,20,20);
+    doc.text('Want2Know — OSINT Report', 40, y); y += 8;
+    doc.setDrawColor(220,220,220); doc.line(40, y, pageW-40, y); y += 18;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(110,110,110);
+    doc.text(`${title} · Generated ${new Date().toISOString().slice(0,19).replace('T',' ')} UTC`, 40, y); y += 22;
+
+    items.forEach((it, i) => {
+      if (y > pageH - 80) { doc.addPage(); y = 50; }
+      doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(20,20,20);
+      doc.text(`${i+1}. [${(it.kind||'').toUpperCase()}] ${it.input}`, 40, y); y += 14;
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(80,80,80);
+      const text = it.error ? 'Error: ' + it.error : (it.summary || '');
+      const lines = doc.splitTextToSize(text, pageW - 80);
+      doc.text(lines, 50, y); y += lines.length * 12 + 6;
+      doc.setDrawColor(240,240,240); doc.line(40, y, pageW-40, y); y += 10;
+    });
+    doc.setFontSize(8); doc.setTextColor(150,150,150);
+    doc.text('Want2Know by PaperBagExpress — github.com/youknowzo', 40, pageH - 24);
+    doc.save(`want2know-report-${Date.now()}.pdf`);
+    showToast('PDF exported', 'success');
+  }
+
+  // ── Saved Cases (localStorage) ────────────────────────────────────
+  const CASE_KEY = 'w2k_cases_v1';
+  let activeCase = null;
+  function loadCases() { try { return JSON.parse(localStorage.getItem(CASE_KEY)||'{}'); } catch(e){ return {}; } }
+  function persistCases(c) { try { localStorage.setItem(CASE_KEY, JSON.stringify(c)); } catch(e){} }
+  function saveToCase(tool, input, raw) {
+    if (!activeCase) return;
+    const cases = loadCases();
+    cases[activeCase] = cases[activeCase] || { created: Date.now(), entries: [] };
+    cases[activeCase].entries.push({ tool, input, ts: Date.now(), summary: bulkResults.find?.(b=>b.input===input)?.summary || '' });
+    persistCases(cases); renderCases();
+  }
+  function renderCases() {
+    const cases = loadCases();
+    const el = document.getElementById('case-list');
+    const names = Object.keys(cases);
+    if (!names.length) { el.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:14px">No cases yet. Create one above and any lookup will be tagged to it.</div>'; return; }
+    el.innerHTML = names.sort().map(n => {
+      const c = cases[n];
+      const isActive = n === activeCase;
+      return `<div style="border:1px solid ${isActive?'var(--accent2)':'var(--border)'};border-radius:10px;padding:10px;margin-bottom:6px;background:${isActive?'var(--bg-hover)':'var(--bg-card)'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+          <div><strong style="font-family:'Inter',sans-serif">${n}</strong> <span style="font-size:11px;color:var(--text-muted)">· ${c.entries.length} entries</span></div>
+          <div style="display:flex;gap:4px">
+            <button onclick="window.activateCase('${n.replace(/'/g,"\\'")}')" style="font-size:10px;padding:3px 8px;border:1px solid var(--border);background:var(--bg-card);border-radius:4px;cursor:pointer">${isActive?'✓ Active':'Activate'}</button>
+            <button onclick="window.exportCase('${n.replace(/'/g,"\\'")}')" style="font-size:10px;padding:3px 8px;border:1px solid var(--border);background:var(--bg-card);border-radius:4px;cursor:pointer"><i class="fa fa-file-pdf"></i></button>
+            <button onclick="window.deleteCase('${n.replace(/'/g,"\\'")}')" style="font-size:10px;padding:3px 8px;border:1px solid var(--border);background:var(--bg-card);color:var(--red);border-radius:4px;cursor:pointer"><i class="fa fa-trash"></i></button>
+          </div>
+        </div>
+        ${c.entries.length ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:6px;font-family:'JetBrains Mono',monospace;line-height:1.5;max-height:80px;overflow:auto">${c.entries.slice(-6).map(e=>`<div>• [${e.tool}] ${e.input}${e.summary?' — '+e.summary.substring(0,60):''}</div>`).join('')}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+  window.activateCase = (n) => { activeCase = n; showToast(`Case "${n}" is active — new lookups will be tagged`, 'success'); renderCases(); };
+  window.exportCase = (n) => { const cases = loadCases(); exportPDF(`Case: ${n}`, (cases[n]?.entries||[]).map(e=>({kind:e.tool,input:e.input,summary:e.summary||'(no summary)'}))); };
+  window.deleteCase = (n) => { if (!confirm(`Delete case "${n}"?`)) return; const cases = loadCases(); delete cases[n]; persistCases(cases); if (activeCase===n) activeCase=null; renderCases(); };
+  document.getElementById('btn-case-new').addEventListener('click', () => {
+    const name = document.getElementById('case-name').value.trim();
+    if (!name) { showToast('Enter a case name', 'error'); return; }
+    const cases = loadCases();
+    if (!cases[name]) { cases[name] = { created: Date.now(), entries: [] }; persistCases(cases); }
+    activeCase = name;
+    document.getElementById('case-name').value = '';
+    showToast(`Case "${name}" created and active`, 'success');
+    renderCases();
+  });
+  document.getElementById('btn-case-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(loadCases(), null, 2)], { type:'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `want2know-cases-${Date.now()}.json`; a.click();
+    showToast('Cases exported', 'success');
+  });
+  document.getElementById('btn-case-clear').addEventListener('click', () => {
+    if (!confirm('Delete ALL saved cases? This cannot be undone.')) return;
+    persistCases({}); activeCase = null; renderCases();
+    showToast('All cases cleared', 'success');
+  });
+  renderCases();
+
+  // ── Live Search Counter ───────────────────────────────────────────
+  function fmtNum(n) { return n.toLocaleString(); }
+  async function refreshStat() {
+    try {
+      const r = await fetch('/api/stats').then(r=>r.json());
+      const el = document.getElementById('live-search-count');
+      if (el && typeof r.searches === 'number') el.textContent = fmtNum(r.searches);
+    } catch(e) {}
+  }
+  async function bumpStat() {
+    try {
+      const r = await fetch('/api/stats/bump', { method:'POST' }).then(r=>r.json());
+      const el = document.getElementById('live-search-count');
+      if (el && typeof r.searches === 'number') el.textContent = fmtNum(r.searches);
+    } catch(e) {}
+  }
+  refreshStat();
+  setInterval(refreshStat, 30000);
+  window.bumpStat = bumpStat;
 
   // ── Dark Mode ─────────────────────────────────────────────────────
   const darkKey = 'w2k_dark_mode';

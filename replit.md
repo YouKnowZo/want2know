@@ -1,7 +1,27 @@
 # Want2Know by PaperBagExpress
 
 ## Overview
-Want2Know is an OSINT (Open Source Intelligence) tool by PaperBagExpress that searches for user profiles across 1000+ social media platforms. Provides a modern light-theme web UI, CLI, and Python library interface. Includes phone number lookup, IP/domain geolocation, and WHOIS/RDAP domain lookup tools. Features dark mode, result persistence, filter/sort for detected profiles, About modal, slow scan warning, and rate limiting.
+Want2Know is an OSINT (Open Source Intelligence) tool by PaperBagExpress that searches for user profiles across 1000+ social media platforms. Provides a modern light-theme web UI, CLI, and Python library interface.
+
+OSINT Toolkit (14 tools, 100% free, no API keys):
+- Phone Number Intel (carrier, line type, area-code city/state, risk, all formats)
+- Email Intel (validation, MX, SPF/DMARC, Gravatar, Google dorks)
+- IP / Domain Geolocation (with embedded Leaflet map)
+- WHOIS / RDAP
+- DNS Records (A/AAAA/MX/NS/TXT/CNAME/SOA/CAA/DMARC via Cloudflare DoH)
+- Subdomain Finder (crt.sh Certificate Transparency)
+- Security Headers (graded against HSTS/CSP/XFO/etc)
+- Username Variations Generator
+- Breach Analytics (XposedOrNot — real breach names, dates, exposed fields, risk score)
+- Wayback Snapshots (Internet Archive CDX)
+- Threat Intelligence (URLhaus + ThreatFox)
+- GitHub Profile deep-scan (bio, repos, stars, languages)
+- Reddit Profile deep-scan (karma, account age, recent subs/comments)
+- Reverse Image Search (Google Lens, Yandex, TinEye, Bing, Karma Decay, SauceNAO link generators)
+- Bulk Lookup (paste up to 50 / CSV upload, auto-detects type)
+- PDF Report Export (jsPDF)
+- Saved Cases (localStorage-backed investigations)
+- Live searches counter (file-backed)
 
 ## Architecture
 - **Backend**: Node.js + Express.js (`app.js`)
