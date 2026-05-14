@@ -974,6 +974,13 @@ if (argv.grid !== '') {
   helper.grid_url = argv.grid
 }
 if (argv.gui) {
+  // Enable all sites for web-GUI mode (sites.json ships with most set to "false")
+  helper.websites_entries.forEach(function (site, i) {
+    if (site.url) helper.websites_entries[i].selected = 'true'
+  })
+  const enabledCount = helper.websites_entries.filter(s => s.selected === 'true').length
+  console.log('[init] Enabled ' + enabledCount + ' sites for scanning')
+
   app.listen(server_port, server_host, function () {
     console.log('Server started at http://%s:%s/app.html', server_host, server_port)
   })
