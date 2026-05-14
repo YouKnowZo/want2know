@@ -66,12 +66,15 @@ async function find_username_normal_wrapper (req, sites, baseChecked = 0, totalA
     if (temp_sites.length > 0) {
       await temp_sites.forEach(site => {
         if (site.detections.length > 0 && !helper.global_lock.includes(req.body.uuid)) {
-          functions.push(async (cb) => {
-            const result = await find_username_site(req.body.uuid, req.body.string, req.body.option, site)
-            checked++
-            const foundSoFar = results.filter(r => r && r.good === 'true').length + (result && result.profile && result.profile.good === 'true' ? 1 : 0)
-            if (global.__w2k_setProgress && totalAll > 0) global.__w2k_setProgress(req.body.uuid, checked, totalAll, foundSoFar)
-            cb(null, result)
+          functions.push((cb) => {
+            find_username_site(req.body.uuid, req.body.string, req.body.option, site)
+              .then(result => {
+                checked++
+                const foundSoFar = results.filter(r => r && r.good === 'true').length + (result && result.profile && result.profile.good === 'true' ? 1 : 0)
+                if (global.__w2k_setProgress && totalAll > 0) global.__w2k_setProgress(req.body.uuid, checked, totalAll, foundSoFar)
+                cb(null, result)
+              })
+              .catch(err => cb(null, { return: 0, site }))
           })
         }
       })
