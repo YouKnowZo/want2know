@@ -79,6 +79,7 @@ if (semver.satisfies(process.version, '>13 || <13')) {
 
 import express from 'express'
 import fs from 'fs'
+import { timingSafeEqual } from 'node:crypto'
 import { spawn } from 'child_process'
 import tokenizer from 'wink-tokenizer'
 import generatorics from 'generatorics'
@@ -107,6 +108,48 @@ const app = express()
 app.set('etag', false)
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
+const appAuthUsername = process.env.APP_AUTH_USERNAME
+const appAuthPassword = process.env.APP_AUTH_PASSWORD
+const appAuthConfigured = Boolean(appAuthUsername && appAuthPassword)
+const appAuthRequired = process.env.NODE_ENV === 'production' || process.env.APP_AUTH_REQUIRED === 'true'
+
+if (argv.gui && Boolean(appAuthUsername) !== Boolean(appAuthPassword)) {
+  throw new Error('Set both APP_AUTH_USERNAME and APP_AUTH_PASSWORD, or leave both unset.')
+}
+if (argv.gui && appAuthRequired && !appAuthConfigured) {
+  throw new Error('APP_AUTH_USERNAME and APP_AUTH_PASSWORD are required in production or when APP_AUTH_REQUIRED=true.')
+}
+
+function matchesSecret(expected, actual) {
+  const expectedBuffer = Buffer.from(expected)
+  const actualBuffer = Buffer.from(actual)
+  return expectedBuffer.length === actualBuffer.length && timingSafeEqual(expectedBuffer, actualBuffer)
+}
+
+if (appAuthConfigured) {
+  app.use((req, res, next) => {
+    const match = req.get('authorization')?.match(/^Basic\s+([A-Za-z0-9+/]+={0,2})$/i)
+    if (!match) {
+      res.set('WWW-Authenticate', 'Basic realm="Want2Know", charset="UTF-8"')
+      res.set('Cache-Control', 'no-store')
+      return res.status(401).send('Authentication required')
+    }
+
+    const credentials = Buffer.from(match[1], 'base64').toString('utf8')
+    const separator = credentials.indexOf(':')
+    if (separator < 0 ||
+      !matchesSecret(appAuthUsername, credentials.slice(0, separator)) ||
+      !matchesSecret(appAuthPassword, credentials.slice(separator + 1))) {
+      res.set('WWW-Authenticate', 'Basic realm="Want2Know", charset="UTF-8"')
+      res.set('Cache-Control', 'no-store')
+      return res.status(401).send('Authentication required')
+    }
+
+    next()
+  })
+}
+
 app.use(express.static('public'))
 
 // ── In-memory rate limiter ────────────────────────────────────────────────────

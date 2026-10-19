@@ -180,6 +180,12 @@ Setting:
   --silent      Disable output to screen
 ```
 
+## Hosted Deployment Security
+
+The web app is intended for a trusted environment, not as an unauthenticated public service. Set `APP_AUTH_USERNAME` and `APP_AUTH_PASSWORD` as deployment secrets; Replit's deployment command also sets `APP_AUTH_REQUIRED=true`, so the server refuses to start without both credentials and protects the UI and API with HTTP Basic Authentication. Do not commit these values or put them in client-side configuration.
+
+The app also depends on a Node process, Python 3, writable local files, and process-local scan progress. Serverless hosting such as Vercel needs a separate persistent backend or a rewrite using durable storage before the full app will work there.
+
 ## Open Shell
 [![Open in Cloud Shell](https://img.shields.io/static/v1?label=%3E_&message=Open%20in%20Cloud%20Shell&color=3267d6&style=flat-square)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/qeeqbox/social-analyzer&tutorial=README.md) [![Open in repl.it Shell](https://img.shields.io/static/v1?label=%3E_&message=Open%20in%20repl.it%20Shell&color=606c74&style=flat-square)](https://repl.it/github/qeeqbox/social-analyzer)
 

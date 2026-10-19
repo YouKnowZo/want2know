@@ -13,7 +13,7 @@ packages = ["xcodebuild", "zlib"]
 language = "nodejs"
 
 [deployment]
-run = ["sh", "-c", "npm run start"]
+run = ["sh", "-c", "APP_AUTH_REQUIRED=true npm run start"]
 deploymentTarget = "cloudrun"
 ignorePorts = false
 
